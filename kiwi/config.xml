@@ -1,11 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  IO Linux Kiwi-NG image definition.
+  IO Linux v0.1 — minimal Kiwi-NG image definition.
 
-  Stub: this file becomes a working Kalpa-derivative image definition in
-  the next commit. See docs/architecture.md for the chosen base and
-  https://osinside.github.io/kiwi/ for the schema.
+  Builds an unbranded openSUSE Tumbleweed Plasma live ISO. This is the
+  baseline that branding, Plasma layout, and io-welcome layer onto in
+  later commits. Keeping the first working build deliberately boring
+  means later bugs can't hide behind base-image bugs — see
+  docs/architecture.md.
+
+  Schema reference: https://osinside.github.io/kiwi/
+  Schema version 7.6 matches openSUSE's own kiwi-descriptions examples
+  at https://github.com/OSInside/kiwi-descriptions.
 -->
-<image schemaversion="7.4" name="IO-Linux">
-  <!-- TODO: <description>, <preferences>, <repository>, <packages>, <users> -->
+<image schemaversion="7.6" name="IO-Linux">
+    <description type="system">
+        <author>The IO Linux contributors</author>
+        <contact>https://github.com/thrizzo/io-os</contact>
+        <specification>
+            IO Linux v0.1 — Plasma live ISO baseline (no branding yet).
+        </specification>
+    </description>
+
+    <preferences>
+        <!--
+          Live ISO. `flags="overlay"` + `hybridpersistent` lets the same
+          image be dd'd to a USB stick and persist user changes there.
+        -->
+        <type image="iso"
+              primary="true"
+              flags="overlay"
+              hybridpersistent_filesystem="ext4"
+              hybridpersistent="true"
+              firmware="uefi"
+              kernelcmdline="quiet splash"/>
+        <version>0.1.0</version>
+        <packagemanager>zypper</packagemanager>
+        <!-- de_DE first-class per docs/architecture.md; en_US co-installed. -->
+        <locale>de_DE,en_US</locale>
+        <keytable>de</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <!-- Vanilla openSUSE bootsplash for now; replaced by IO Plymouth in a later commit. -->
+        <bootsplash-theme>bgrt</bootsplash-theme>
+        <bootloader-theme>openSUSE</bootloader-theme>
+    </preferences>
+
+    <users>
+        <!-- Root: locked-style hash from upstream Tumbleweed example. Override per deployment. -->
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+              home="/root" name="root" groups="root"/>
+        <!-- Live user, blank password. Only present in the live session;
+             Calamares creates a real user at install time. -->
+        <user password=""
+              pwdformat="plain"
+              home="/home/io"
+              name="io"
+              groups="users,wheel,video,audio,plugdev"/>
+    </users>
+
+    <repository type="rpm-md" alias="kiwi" priority="1">
+        <source path="obs://Virtualization:Appliances:Builder/openSUSE_Tumbleweed"/>
+    </repository>
+    <repository alias="Tumbleweed" imageinclude="true">
+        <source path="http://download.opensuse.org/tumbleweed/repo/oss"/>
+    </repository>
+    <!--
+      Kalpa-specific repo, intentionally commented for v0.1 minimal step.
+      The minimal build uses plain Tumbleweed Plasma so we can validate
+      the live-boot path before adding transactional-update, the read-only
+      btrfs root, and other Kalpa-specific behaviour.
+      <repository alias="Kalpa">
+          <source path="obs://devel:microos:kalpa/openSUSE_Tumbleweed"/>
+      </repository>
+    -->
+
+    <packages type="image">
+        <!-- Base system. -->
+        <package name="patterns-openSUSE-base"/>
+        <package name="kernel-default"/>
+        <package name="kernel-firmware"/>
+        <package name="timezone"/>
+        <package name="glibc-locale"/>
+
+        <!-- Boot. -->
+        <package name="shim"/>
+        <package name="grub2"/>
+        <package name="grub2-i386-pc"/>
+        <package name="grub2-x86_64-efi"/>
+        <package name="syslinux"/>
+        <package name="plymouth"/>
+        <package name="plymouth-theme-bgrt"/>
+        <package name="plymouth-dracut"/>
+        <package name="grub2-branding-openSUSE"/>
+
+        <!-- Networking + remote login (live image expectation). -->
+        <package name="NetworkManager"/>
+        <package name="NetworkManager-applet"/>
+        <package name="openssh"/>
+        <package name="iproute2"/>
+        <package name="iputils"/>
+        <package name="dhcp-client"/>
+
+        <!-- Plasma 6 desktop + display manager. -->
+        <package name="patterns-kde-kde_plasma"/>
+        <package name="sddm"/>
+        <package name="sddm-branding-openSUSE"/>
+        <package name="xorg-x11-server"/>
+
+        <!-- Flatpak: primary user-app delivery channel per docs/architecture.md. -->
+        <package name="flatpak"/>
+
+        <!-- Filesystems / partitioning support. -->
+        <package name="parted"/>
+        <package name="lvm2"/>
+        <package name="btrfsprogs"/>
+        <package name="snapper"/>
+
+        <!-- Convenience. -->
+        <package name="vim"/>
+        <package name="bash-completion"/>
+        <package name="less"/>
+        <package name="which"/>
+        <package name="tar"/>
+        <package name="xz"/>
+        <package name="fontconfig"/>
+        <package name="fonts-config"/>
+        <package name="sudo"/>
+    </packages>
+
+    <packages type="iso">
+        <!-- Required for live-ISO boot. -->
+        <package name="dracut-kiwi-live"/>
+    </packages>
+
+    <packages type="bootstrap">
+        <package name="shadow"/>
+        <package name="udev"/>
+        <package name="filesystem"/>
+        <package name="diffutils"/>
+        <package name="gawk"/>
+        <package name="grep"/>
+        <package name="gzip"/>
+        <package name="procps"/>
+        <package name="glibc-locale"/>
+        <package name="cracklib-dict-full"/>
+        <package name="ca-certificates"/>
+        <package name="openSUSE-release"/>
+        <package name="xz"/>
+    </packages>
 </image>
