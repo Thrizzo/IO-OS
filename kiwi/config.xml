@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IO Linux Kiwi-NG image definition.
+
+  Stub: this file becomes a working Kalpa-derivative image definition in
+  the next commit. See docs/architecture.md for the chosen base and
+  https://osinside.github.io/kiwi/ for the schema.
+-->
+<image schemaversion="7.4" name="IO-Linux">
+  <!-- TODO: <description>, <preferences>, <repository>, <packages>, <users> -->
+</image>

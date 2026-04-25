@@ -1,0 +1,3 @@
+# Global KDE settings, shipped to /etc/skel/.config/.
+# Stub. Will set: ColorScheme=IO, single-click=false (Windows users expect
+# double-click), 24-hour clock, dd.MM.yyyy date format.

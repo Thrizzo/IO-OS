@@ -1,0 +1,22 @@
+# Build output
+out/
+*.iso
+*.iso.sha256
+*.packages
+*.verified
+
+# Kiwi caches
+.kiwi/
+.kiwi-cache/
+build/
+
+# QEMU test artifacts
+*.qcow2
+*.img
+
+# Editor / OS noise
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/

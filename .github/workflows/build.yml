@@ -1,0 +1,19 @@
+# Nightly ISO build via OBS.
+# Stub: real workflow lands once the OBS project is set up. Until then this
+# file documents intent only.
+name: Build IO Linux ISO
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # 03:00 UTC nightly
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: TODO
+        run: |
+          echo "Trigger OBS rebuild and publish ISO as release artifact."
+          echo "Stub — see docs/architecture.md for the planned approach."
+          exit 0

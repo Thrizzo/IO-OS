@@ -1,0 +1,21 @@
+IO Linux
+Copyright (C) 2026 The IO Linux contributors
+
+PROPOSED LICENSE: GPL-3.0-or-later
+
+The full text of the GNU General Public License v3.0 will be vendored here
+once the license choice is confirmed. See https://www.gnu.org/licenses/gpl-3.0.txt
+for the canonical text in the meantime.
+
+Branding assets in branding/ (wallpapers, logos, theme bundles) are
+released under CC-BY-SA-4.0 unless explicitly marked otherwise inside
+that directory.
+
+Rationale for GPL-3.0-or-later:
+- Matches the license posture of much of the upstream KDE/openSUSE stack
+  we depend on, so derivative work doesn't trip on incompatibility.
+- Copyleft aligns with the sovereignty pitch: forks must stay open.
+- "or-later" leaves room to adopt GPL-4 if and when it exists, without
+  re-contacting every contributor.
+
+This is a stub pending explicit confirmation from the project lead.

@@ -1,0 +1,8 @@
+# Plasma panel + desktop layout, shipped to /etc/skel/.config/.
+# Stub: real layout (bottom panel, "io" launcher, pinned apps, system tray)
+# lands once we've validated the minimal Kiwi build boots.
+#
+# Why this lives in the repo: hand-crafting the appletsrc by hand is fragile;
+# we will generate it by booting a vanilla Kalpa image, configuring Plasma
+# once via the GUI, then snapshotting the resulting file. That snapshot
+# replaces this stub.
