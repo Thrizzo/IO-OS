@@ -1,0 +1,16 @@
+[SddmGreeterTheme]
+Name=IO
+Description=IO Linux login — Io moon on deep navy
+Author=The IO Linux contributors
+Copyright=CC-BY-SA-4.0
+License=CC-BY-SA-4.0
+Type=sddm-theme
+Version=0.1.0
+Website=https://github.com/thrizzo/io-os
+Screenshot=preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Theme-Id=io
+Theme-API=2.0
+QtVersion=6

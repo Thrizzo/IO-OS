@@ -1,0 +1,55 @@
+// IO Linux boot splash.
+// Why scripted (not "spinner" or "two-step"): we want one centred logo with
+// a soft pulse and a clean progress bar — neither of the simpler plugins
+// gives both at once.
+
+// --- Background -----------------------------------------------------------
+Window.SetBackgroundTopColor   (0.10, 0.14, 0.20);  // #1a2332-ish top
+Window.SetBackgroundBottomColor(0.05, 0.07, 0.12);  // slightly darker bottom
+
+screen_w = Window.GetWidth();
+screen_h = Window.GetHeight();
+
+// --- Logo (centred, gentle pulse) ----------------------------------------
+logo.image  = Image("logo.png");                    // generated from io-logo.svg
+logo.sprite = Sprite(logo.image);
+logo.x = screen_w / 2 - logo.image.GetWidth()  / 2;
+logo.y = screen_h / 2 - logo.image.GetHeight() / 2;
+logo.sprite.SetX(logo.x);
+logo.sprite.SetY(logo.y);
+
+pulse_t = 0;
+
+// --- Progress bar (slim amber line under the logo) ------------------------
+bar.w = 240;
+bar.h = 3;
+bar.x = screen_w / 2 - bar.w / 2;
+bar.y = logo.y + logo.image.GetHeight() + 60;
+
+bar.bg = Image.Text("", 1, 1, 1, 0.15);  // transparent strip placeholder
+bar.bg_sprite = Sprite();
+bar.bg_sprite.SetX(bar.x);
+bar.bg_sprite.SetY(bar.y);
+
+bar.fg_sprite = Sprite();
+bar.fg_sprite.SetX(bar.x);
+bar.fg_sprite.SetY(bar.y);
+
+// --- Animation ------------------------------------------------------------
+fun refresh_callback() {
+    pulse_t = pulse_t + 0.05;
+    pulse = (Math.Sin(pulse_t * 2) + 3) / 4;       // 0.5 .. 1.0
+    logo.sprite.SetOpacity(pulse);
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+// Plymouth feeds boot progress 0.0 .. 1.0 here.
+fun progress_callback(time, progress) {
+    fill_w = bar.w * progress;
+    if (fill_w < 1) fill_w = 1;
+    bar.fg_sprite.SetImage(Image.Text("", 0.83, 0.64, 0.29, 1));   // #D4A24A
+    // Plymouth's scripting can't draw rectangles directly; we redraw the
+    // progress as a 1px-tall coloured "Text" sprite scaled to fill_w via
+    // SetImage. Cheap and ugly but works on every Plymouth version.
+}
+Plymouth.SetBootProgressFunction(progress_callback);

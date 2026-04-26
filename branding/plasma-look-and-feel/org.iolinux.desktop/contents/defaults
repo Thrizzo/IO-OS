@@ -1,0 +1,27 @@
+# IO Linux Plasma Look-and-Feel defaults.
+# Read by Plasma when this look-and-feel package is selected.
+# Each section maps to a kdeglobals/plasmarc/etc. group.
+
+[kdeglobals][General]
+ColorScheme=IO
+
+[kdeglobals][KDE]
+LookAndFeelPackage=org.iolinux.desktop
+widgetStyle=Breeze
+
+[plasmarc][Theme]
+name=default
+
+[kwinrc][org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze
+
+[ksplashrc][KSplash]
+Theme=org.iolinux.desktop
+Engine=KSplashQML
+
+[kcminputrc][Mouse]
+cursorTheme=breeze_cursors
+
+[kscreenlockerrc][Greeter][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/IO/contents/images/io-default.svg

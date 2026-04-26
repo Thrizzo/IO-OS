@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            { "Email": "", "Name": "The IO Linux contributors" }
+        ],
+        "Category": "Plasma Look And Feel",
+        "Description": "IO Linux global theme — Io moon on deep navy",
+        "Description[de]": "IO Linux Gesamtthema — Io-Mond auf tiefem Marineblau",
+        "Id": "org.iolinux.desktop",
+        "License": "CC-BY-SA-4.0",
+        "Name": "IO",
+        "Name[de]": "IO",
+        "Version": "0.1.0",
+        "Website": "https://github.com/thrizzo/io-os"
+    },
+    "X-Plasma-APIVersion": "6.0",
+    "X-Plasma-MainScript": "defaults",
+    "KPackageStructure": "Plasma/LookAndFeel"
+}

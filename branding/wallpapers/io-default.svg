@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IO Linux default wallpaper.
+  Stylized Io moon on deep navy. SVG so we can scale to any panel/screen
+  without re-exporting raster sizes for every change.
+  Palette: navy #1a2332, amber #D4A24A — see docs/architecture.md.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1920 1080"
+     preserveAspectRatio="xMidYMid slice"
+     width="1920" height="1080">
+  <defs>
+    <radialGradient id="sky" cx="65%" cy="40%" r="80%">
+      <stop offset="0%"  stop-color="#243047"/>
+      <stop offset="60%" stop-color="#1a2332"/>
+      <stop offset="100%" stop-color="#0c1220"/>
+    </radialGradient>
+    <radialGradient id="ioMoon" cx="35%" cy="35%" r="70%">
+      <stop offset="0%"  stop-color="#F4D279"/>
+      <stop offset="45%" stop-color="#D4A24A"/>
+      <stop offset="80%" stop-color="#8B6020"/>
+      <stop offset="100%" stop-color="#3A2810"/>
+    </radialGradient>
+    <radialGradient id="ioGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#D4A24A" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#D4A24A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="moonTexture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/>
+      <feColorMatrix values="0 0 0 0 0.55  0 0 0 0 0.40  0 0 0 0 0.10  0 0 0 0.18 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+
+  <!-- Distant stars -->
+  <g fill="#F0F0F0" opacity="0.55">
+    <circle cx="120"  cy="160" r="1.2"/>
+    <circle cx="280"  cy="90"  r="0.8"/>
+    <circle cx="430"  cy="240" r="1.0"/>
+    <circle cx="610"  cy="120" r="0.9"/>
+    <circle cx="780"  cy="60"  r="1.4"/>
+    <circle cx="920"  cy="200" r="0.7"/>
+    <circle cx="1100" cy="110" r="1.1"/>
+    <circle cx="1280" cy="180" r="0.9"/>
+    <circle cx="1460" cy="80"  r="1.3"/>
+    <circle cx="1640" cy="220" r="0.8"/>
+    <circle cx="1820" cy="140" r="1.0"/>
+    <circle cx="170"  cy="900" r="0.9"/>
+    <circle cx="380"  cy="980" r="1.1"/>
+    <circle cx="540"  cy="850" r="0.7"/>
+    <circle cx="760"  cy="940" r="1.2"/>
+    <circle cx="1050" cy="1010" r="0.8"/>
+    <circle cx="1320" cy="880" r="1.0"/>
+    <circle cx="1700" cy="960" r="0.9"/>
+  </g>
+
+  <!-- Io moon: glow + body + texture -->
+  <g transform="translate(1280, 540)">
+    <circle r="520" fill="url(#ioGlow)"/>
+    <circle r="320" fill="url(#ioMoon)"/>
+    <circle r="320" fill="#D4A24A" filter="url(#moonTexture)" opacity="0.6"/>
+    <!-- A few darker volcanic patches, hand-placed for character -->
+    <ellipse cx="-90" cy="-40" rx="55" ry="35" fill="#8B6020" opacity="0.45"/>
+    <ellipse cx="60"  cy="80"  rx="80" ry="45" fill="#6B4818" opacity="0.50"/>
+    <ellipse cx="120" cy="-110" rx="40" ry="28" fill="#A87530" opacity="0.40"/>
+    <ellipse cx="-150" cy="120" rx="65" ry="40" fill="#8B6020" opacity="0.45"/>
+    <ellipse cx="-30" cy="180" rx="50" ry="30" fill="#6B4818" opacity="0.40"/>
+  </g>
+</svg>

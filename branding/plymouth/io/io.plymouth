@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=IO
+Description=IO Linux boot splash — Io moon on deep navy
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/io
+ScriptFile=/usr/share/plymouth/themes/io/io.script
