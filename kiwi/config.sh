@@ -12,7 +12,7 @@ test -f /.profile && . /.profile
 
 echo "Configuring image: [${kiwi_iname:-IO-Linux}]..."
 
-# --- openSUSE setup helpers ---
+# --- openSUSE setup helpers ----------------------------------------------
 suseSetupProduct
 
 # Enable services we want active on first boot.
@@ -23,28 +23,39 @@ suseInsertService sddm
 # Boot into the graphical target — Plasma is the point of this image.
 baseSetRunlevel 5
 
-# Live user: passwordless sudo so testers can poke at the live environment
-# without surprises. Calamares replaces this user at install time.
+# --- Live user (deleted by Calamares at install time) --------------------
 echo "io ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/io-live
 chmod 440 /etc/sudoers.d/io-live
 
-# Autologin the live user into Plasma. SDDM's drop-in directory is read
-# in lexicographic order, so the `10-` prefix keeps us first.
 mkdir -p /etc/sddm.conf.d
 cat > /etc/sddm.conf.d/10-io-live-autologin.conf <<'SDDM_EOF'
 # IO Linux live ISO: log the live user straight into Plasma. The installer
-# (Calamares) creates a real user with no autologin, so this only affects
-# the live session.
+# (Calamares) creates a real user with no autologin.
 [Autologin]
 User=io
 Session=plasma
 SDDM_EOF
 
-# Default locale: de_DE.UTF-8 with en_US as fallback (see docs/architecture.md).
+# --- Locale + hostname ----------------------------------------------------
 echo 'LANG=de_DE.UTF-8'         >  /etc/locale.conf
 echo 'LANGUAGE=de_DE:en_US'     >> /etc/locale.conf
+echo 'io-linux-live'            >  /etc/hostname
 
-# Hostname — temporary, the installer lets the user pick a real one.
-echo 'io-linux-live' > /etc/hostname
+# --- Activate IO branding -------------------------------------------------
+# Plymouth: switch the default theme and rebuild the initramfs so the
+# splash actually shows on boot. -R = regenerate initrd.
+if [ -f /usr/share/plymouth/themes/io/io.plymouth ]; then
+    plymouth-set-default-theme -R io || true
+fi
+
+# Refresh icon cache so the IO launcher icon shows up in menus.
+if [ -d /usr/share/icons/hicolor ]; then
+    gtk-update-icon-cache -t /usr/share/icons/hicolor || true
+fi
+
+# Refresh KDE service / desktop / mime caches if the tools are present.
+command -v kbuildsycoca6 >/dev/null 2>&1 && kbuildsycoca6 --noincremental || true
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database -q /usr/share/applications || true
+command -v update-mime-database    >/dev/null 2>&1 && update-mime-database    /usr/share/mime || true
 
 echo "Configuration complete."
