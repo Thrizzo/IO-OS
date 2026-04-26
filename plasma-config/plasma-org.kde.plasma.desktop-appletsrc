@@ -1,8 +1,105 @@
-# Plasma panel + desktop layout, shipped to /etc/skel/.config/.
-# Stub: real layout (bottom panel, "io" launcher, pinned apps, system tray)
-# lands once we've validated the minimal Kiwi build boots.
+# IO Linux Plasma layout — bottom panel + folder-view desktop.
 #
-# Why this lives in the repo: hand-crafting the appletsrc by hand is fragile;
-# we will generate it by booting a vanilla Kalpa image, configuring Plasma
-# once via the GUI, then snapshotting the resulting file. That snapshot
-# replaces this stub.
+# Shipped as /etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc so
+# every new user lands in the IO layout on first login. Plasma rewrites
+# this file in place when the user makes changes through System Settings;
+# the user's edits will override these defaults from then on.
+#
+# Hand-crafted; expect minor iteration on first boot. The structure
+# follows what Plasma itself emits — see
+# https://userbase.kde.org/Plasma/Tips#Configuration_files for the format.
+
+[ActionPlugins][0]
+RightButton;NoModifier=org.kde.contextmenu
+
+[ActionPlugins][1]
+RightButton;NoModifier=org.kde.contextmenu
+
+# === Containment 1: bottom panel ============================================
+[Containments][1]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.panel
+wallpaperplugin=org.kde.image
+
+[Containments][1][General]
+AppletOrder=2;3;4;5;6;7
+thickness=40
+
+# --- Applet 2: kickoff (the "io" start button) -----------------------------
+[Containments][1][Applets][2]
+immutability=1
+plugin=org.kde.plasma.kickoff
+
+[Containments][1][Applets][2][Configuration][General]
+icon=/usr/share/icons/hicolor/scalable/apps/io-logo.svg
+favoritesDisplay=0
+applicationsDisplay=0
+alphaSort=true
+showActionButtonCaptions=true
+useExtraRunners=false
+
+# --- Applet 3: spacer (push pinned apps toward centre) ---------------------
+[Containments][1][Applets][3]
+immutability=1
+plugin=org.kde.plasma.panelspacer
+
+# --- Applet 4: icon-tasks (pinned launchers + running apps) ----------------
+[Containments][1][Applets][4]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][1][Applets][4][Configuration][General]
+launchers=applications:firefox.desktop,applications:org.kde.dolphin.desktop,applications:writer.desktop,applications:org.kde.konsole.desktop,applications:thunderbird.desktop,applications:systemsettings.desktop
+showOnlyCurrentDesktop=false
+showOnlyCurrentActivity=true
+showOnlyCurrentScreen=false
+groupingStrategy=1
+groupedTaskVisualization=1
+
+# --- Applet 5: spacer (right-justify the system tray + clock) --------------
+[Containments][1][Applets][5]
+immutability=1
+plugin=org.kde.plasma.panelspacer
+
+# --- Applet 6: system tray (network, volume, battery, kbd layout) ----------
+[Containments][1][Applets][6]
+immutability=1
+plugin=org.kde.plasma.systemtray
+
+[Containments][1][Applets][6][Configuration][General]
+extraItems=org.kde.plasma.battery,org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.keyboardlayout,org.kde.plasma.notifications,org.kde.plasma.devicenotifier,org.kde.plasma.clipboard
+shownItems=org.kde.plasma.battery,org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.keyboardlayout
+
+# --- Applet 7: digital clock (24h, dd.MM.yyyy) -----------------------------
+[Containments][1][Applets][7]
+immutability=1
+plugin=org.kde.plasma.digitalclock
+
+[Containments][1][Applets][7][Configuration][Appearance]
+use24hFormat=2
+showDate=true
+dateFormat=custom
+customDateFormat=dd.MM.yyyy
+showSeconds=false
+
+# === Containment 2: desktop (folder view) ===================================
+[Containments][2]
+activityId=00000000-0000-0000-0000-000000000000
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.plasma.folder
+wallpaperplugin=org.kde.image
+
+[Containments][2][General]
+ToolBoxButtonState=topright
+url=file://$HOME/Desktop
+
+[Containments][2][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/IO/contents/images/io-default.svg
+SlidePaths=

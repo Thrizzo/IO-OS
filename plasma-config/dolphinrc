@@ -1,0 +1,23 @@
+# Dolphin defaults shipped to /etc/skel/.config/.
+# Tuned for Windows-familiar file management.
+
+[General]
+# Path field as breadcrumb (the default), with the option to switch to
+# editable text via Ctrl+L — matches what Windows users get with the
+# Explorer address bar.
+ShowFullPath=false
+ShowFullPathInTitlebarV2=false
+RememberOpenedTabs=true
+SplitView=false
+
+[KFileDialog Settings]
+# Sidebar (Places panel) visible by default — Windows' "This PC" sidebar
+# equivalent.
+Show Bookmarks=true
+Show hidden files=false
+
+[MainWindow]
+ToolBarsMovable=Disabled
+
+[PreviewSettings]
+Plugins=appimagethumbnail,audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,opendocumentthumbnail,svgthumbnail,textthumbnail,windowsexethumbnail,windowsimagethumbnail

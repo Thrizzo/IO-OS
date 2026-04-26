@@ -1,4 +1,21 @@
-# KWin (window manager) settings, shipped to /etc/skel/.config/.
-# Stub. Will set: window button order matching Windows (min/max/close on
-# right), focus-follows-click, no compositor effects that surprise users
-# coming from Windows.
+# KWin defaults shipped to /etc/skel/.config/.
+# Each override exists to reduce the gap for users coming from Windows.
+
+[org.kde.kdecoration2]
+# Match Windows: minimise / maximise / close on the right, no menu/help/keep.
+ButtonsOnLeft=
+ButtonsOnRight=IAX
+library=org.kde.breeze
+theme=Breeze
+
+[Windows]
+# Click-to-focus is what Windows users expect; focus-follows-mouse is alien to them.
+FocusPolicy=ClickToFocus
+# A clicked window comes to the front — also matches Windows.
+ClickRaise=true
+AutoRaise=false
+
+[Compositing]
+# Keep compositing on (Plasma defaults). Disabling it silently breaks too much.
+Enabled=true
+OpenGLIsUnsafe=false

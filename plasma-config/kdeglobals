@@ -1,3 +1,23 @@
-# Global KDE settings, shipped to /etc/skel/.config/.
-# Stub. Will set: ColorScheme=IO, single-click=false (Windows users expect
-# double-click), 24-hour clock, dd.MM.yyyy date format.
+# Global KDE / Plasma defaults shipped to /etc/skel/.config/.
+# Why each override exists is in the comment immediately above the key.
+
+[General]
+# Apply our color scheme out of the box (see branding/colors/IO.colors).
+ColorScheme=IO
+
+[KDE]
+# Switch the global look-and-feel to IO; pulls in splash, cursor, decoration.
+LookAndFeelPackage=org.iolinux.desktop
+# Windows users expect double-click to open files. Default Plasma is single-click.
+SingleClick=false
+# Use the Breeze widget style for now; revisit once an IO style is built.
+widgetStyle=Breeze
+
+[Locale]
+# 24-hour clock + German short-date layout match the digital-clock applet
+# config and align with the de_DE.UTF-8 default locale.
+DateFormat=dd.MM.yyyy
+TimeFormat=HH:mm
+
+[Icons]
+Theme=breeze
