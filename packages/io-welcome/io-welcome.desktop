@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=IO Welcome
+Name[de]=IO Willkommen
+GenericName=First-run welcome screen
+GenericName[de]=Willkommensbildschirm
+Comment=Introduces IO Linux on first login
+Comment[de]=Stellt IO Linux beim ersten Start vor
+Icon=io-logo
+Exec=/usr/bin/io-welcome-launcher
+Terminal=false
+NoDisplay=true
+OnlyShowIn=KDE;
+X-KDE-autostart-after=panel
+X-GNOME-Autostart-enabled=false

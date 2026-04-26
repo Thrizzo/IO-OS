@@ -108,6 +108,12 @@
         <package name="sddm-branding-openSUSE"/>
         <package name="xorg-x11-server"/>
 
+        <!-- io-welcome: pure-QML first-run greeting. Needs the qml runtime
+             plus the QtQuick.Controls import. -->
+        <package name="qt6-declarative"/>
+        <package name="qt6-declarative-tools"/>
+        <package name="qt6-quickcontrols2"/>
+
         <!-- Flatpak: primary user-app delivery channel per docs/architecture.md. -->
         <package name="flatpak"/>
 

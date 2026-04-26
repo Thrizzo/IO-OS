@@ -126,6 +126,14 @@ EOF
         "$OVERLAY/etc/skel/Desktop/dieser-pc.desktop"
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/papierkorb.desktop" \
         "$OVERLAY/etc/skel/Desktop/papierkorb.desktop"
+
+    # ---- io-welcome (QML + launcher + autostart) ----
+    install -Dm644 "$ROOT/packages/io-welcome/qml/Main.qml" \
+        "$OVERLAY/usr/share/io-welcome/Main.qml"
+    install -Dm755 "$ROOT/packages/io-welcome/io-welcome-launcher" \
+        "$OVERLAY/usr/bin/io-welcome-launcher"
+    install -Dm644 "$ROOT/packages/io-welcome/io-welcome.desktop" \
+        "$OVERLAY/etc/xdg/autostart/io-welcome.desktop"
 }
 
 # --- step 3: build --------------------------------------------------------

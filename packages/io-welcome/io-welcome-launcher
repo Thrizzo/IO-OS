@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Launcher for io-welcome.
+#
+# Skips silently if the user has opted out previously. Otherwise runs
+# the QML app via whichever Qt6 qml runtime is on PATH and persists the
+# opt-out if the app exited with code 42.
+
+set -eu
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/io-welcome"
+DISABLED="$CONFIG_DIR/disabled"
+QML_FILE="/usr/share/io-welcome/Main.qml"
+
+# Already opted out? Done.
+[ -f "$DISABLED" ] && exit 0
+
+# Find a Qt6 qml runtime. openSUSE ships it as either `qml6` or `qml` in
+# /usr/bin (qt6-declarative-tools / qt6-tools).
+QML_BIN=""
+for candidate in qml6 qml; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        QML_BIN=$(command -v "$candidate")
+        break
+    fi
+done
+
+if [ -z "$QML_BIN" ]; then
+    echo "io-welcome: no qml runtime found on PATH; skipping." >&2
+    exit 0
+fi
+
+if [ ! -f "$QML_FILE" ]; then
+    echo "io-welcome: $QML_FILE not installed; skipping." >&2
+    exit 0
+fi
+
+set +e
+"$QML_BIN" "$QML_FILE"
+status=$?
+set -e
+
+# 42 = user ticked "don't show on next start" before closing.
+if [ "$status" = "42" ]; then
+    mkdir -p "$CONFIG_DIR"
+    touch "$DISABLED"
+fi
+
+exit 0
