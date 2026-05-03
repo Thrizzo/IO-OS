@@ -1,6 +1,16 @@
 # IO Linux — Roadmap
 
 > Intent only. Each milestone gets its own design doc before work starts.
+> Dates are *targets*, not commitments — every milestone slips until it's
+> ready, and that's fine.
+
+| Milestone | Target window  | Status        |
+|-----------|----------------|---------------|
+| v0.1      | Q2 2026        | In progress   |
+| v0.2      | Q4 2026        | Planning      |
+| v0.3      | Q2 2027        | Planning      |
+| v0.4      | Q4 2027        | Sketch        |
+| v0.5      | 2028           | Sketch        |
 
 ## v0.1 — Alpha (current)
 

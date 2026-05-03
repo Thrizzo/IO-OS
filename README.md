@@ -33,28 +33,58 @@ production-ready. The Windows compatibility layer, IO Store, VPN unifier,
 and Apple-format bundle are planned for v0.2–v0.5 — see
 [docs/roadmap.md](docs/roadmap.md).
 
+### System requirements (build host)
+
+| Resource     | Minimum             | Recommended           |
+|--------------|---------------------|-----------------------|
+| OS           | openSUSE Tumbleweed | openSUSE Tumbleweed   |
+| Disk (free)  | 15 GB               | 30 GB                 |
+| RAM          | 4 GB                | 8 GB                  |
+| Build time   | 20–40 min           | 10–20 min on NVMe     |
+| Network      | required            | required              |
+
+`kiwi-ng` requires root for chroot/loopback mounts; `./build.sh` calls
+`sudo` automatically when not run as root.
+
 ### Building the ISO
 
-Requires an openSUSE Tumbleweed workstation with `kiwi-ng` installed.
-
 ```sh
+sudo zypper install kiwi-ng librsvg-tools
 ./build.sh
 # Output: ./out/IO-Linux-<version>.x86_64.iso
+#         ./out/SHA256SUMS
+#         ./out/kiwi-build.log
 ```
+
+### Troubleshooting
+
+- **`no .iso produced`** — open `out/kiwi-build.log`; the last 50 lines
+  almost always pinpoint a failed package install or repo fetch.
+- **`No space left on device`** during build — kiwi stages into
+  `/var/tmp` by default. Either free space there or set `TMPDIR` to a
+  larger volume before running `./build.sh`.
+- **`rsvg-convert: command not found`** — install `librsvg-tools`
+  (the build will skip rasterization otherwise and Plymouth/legacy
+  menus will fall back to placeholder icons).
+- **First-boot "no qml runtime"** notification — the live image is
+  missing `qt6-declarative-tools`; add it to `kiwi/config.xml`.
 
 ### Testing the ISO in QEMU
 
 ```sh
+qemu-img create -f qcow2 io-test.qcow2 20G
 qemu-system-x86_64 \
   -enable-kvm \
   -m 4G \
   -smp 2 \
+  -snapshot \
   -drive file=./out/IO-Linux-*.iso,media=cdrom \
   -drive file=io-test.qcow2,if=virtio \
   -boot d
 ```
 
-(Create `io-test.qcow2` once with `qemu-img create -f qcow2 io-test.qcow2 20G`.)
+`-snapshot` discards writes to the qcow2 on shutdown, so each run starts
+clean. Drop it once you're ready to install for real.
 
 ### Contributing
 
@@ -89,29 +119,47 @@ ist nicht produktionsreif. Windows-Kompatibilitätsschicht, IO Store,
 VPN-Vereinheitlichung und Apple-Formate sind für v0.2–v0.5 geplant —
 siehe [docs/roadmap.md](docs/roadmap.md).
 
+### Systemvoraussetzungen (Build-Host)
+
+| Ressource         | Minimum             | Empfohlen             |
+|-------------------|---------------------|-----------------------|
+| Betriebssystem    | openSUSE Tumbleweed | openSUSE Tumbleweed   |
+| Freier Speicher   | 15 GB               | 30 GB                 |
+| Arbeitsspeicher   | 4 GB                | 8 GB                  |
+| Bauzeit           | 20–40 min           | 10–20 min auf NVMe    |
+| Netzwerk          | erforderlich        | erforderlich          |
+
 ### ISO bauen
 
-Voraussetzung: openSUSE Tumbleweed mit installiertem `kiwi-ng`.
-
 ```sh
+sudo zypper install kiwi-ng librsvg-tools
 ./build.sh
 # Ergebnis: ./out/IO-Linux-<version>.x86_64.iso
+#           ./out/SHA256SUMS
+#           ./out/kiwi-build.log
 ```
+
+### Fehlersuche
+
+- **`no .iso produced`** → `out/kiwi-build.log` öffnen.
+- **`No space left on device`** → `TMPDIR` auf ein größeres Volume setzen.
+- **`rsvg-convert: command not found`** → `librsvg-tools` installieren.
 
 ### ISO in QEMU testen
 
 ```sh
+qemu-img create -f qcow2 io-test.qcow2 20G
 qemu-system-x86_64 \
   -enable-kvm \
   -m 4G \
   -smp 2 \
+  -snapshot \
   -drive file=./out/IO-Linux-*.iso,media=cdrom \
   -drive file=io-test.qcow2,if=virtio \
   -boot d
 ```
 
-(`io-test.qcow2` einmalig erzeugen mit
-`qemu-img create -f qcow2 io-test.qcow2 20G`.)
+`-snapshot` verwirft Schreibzugriffe nach dem Beenden — nützlich beim Testen.
 
 ### Mitwirken
 
