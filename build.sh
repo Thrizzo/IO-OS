@@ -119,7 +119,8 @@ EOF
         "$OVERLAY/usr/share/plasma/look-and-feel/org.iolinux.desktop/contents/defaults"
 
     # ---- Plasma config in /etc/skel/.config/ ----
-    for f in plasma-org.kde.plasma.desktop-appletsrc kdeglobals kwinrc dolphinrc; do
+    for f in plasma-org.kde.plasma.desktop-appletsrc kdeglobals kwinrc dolphinrc \
+             kglobalshortcutsrc; do
         install -Dm644 "$ROOT/plasma-config/$f" "$OVERLAY/etc/skel/.config/$f"
     done
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/dieser-pc.desktop" \
@@ -148,13 +149,24 @@ echo "    description: $DESC"
 echo "    output:      $OUT"
 echo
 
-$SUDO kiwi-ng --type iso system build \
+# kiwi-ng spawns zypper, which already parallelises; --logfile keeps the
+# verbose build trace next to the ISO so post-mortems don't need scrollback.
+$SUDO kiwi-ng --type iso --logfile "$OUT/kiwi-build.log" system build \
     --description "$DESC" \
     --target-dir "$OUT"
 
 echo
 echo "==> Build complete. Artefacts:"
-ls -lh "$OUT"/*.iso 2>/dev/null || {
-    echo "    no .iso produced — check kiwi log above"
+if ls "$OUT"/*.iso >/dev/null 2>&1; then
+    ls -lh "$OUT"/*.iso
+
+    # Emit deterministic checksums for downstream verification (mirrors,
+    # release pages). Overwrites on re-build so SHA256SUMS is always current.
+    ( cd "$OUT" && sha256sum -- *.iso > SHA256SUMS )
+    echo
+    echo "==> SHA256SUMS:"
+    cat "$OUT/SHA256SUMS"
+else
+    echo "    no .iso produced — see $OUT/kiwi-build.log"
     exit 1
-}
+fi

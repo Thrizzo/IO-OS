@@ -23,11 +23,14 @@ jobs:
 
       - name: Shell syntax (bash -n)
         run: |
-          set -e
-          for f in build.sh \
-                   kiwi/config.sh \
-                   branding/icons/generate-pngs.sh \
-                   packages/io-welcome/io-welcome-launcher; do
+          set -euo pipefail
+          # Auto-discover so new shell scripts get linted without editing CI.
+          mapfile -t scripts < <(
+              find . -type f \
+                  \( -name '*.sh' -o -name '*-launcher' -o -name 'config.sh' \) \
+                  -not -path './.git/*'
+          )
+          for f in "${scripts[@]}"; do
               echo "  bash -n $f"
               bash -n "$f"
           done
@@ -37,22 +40,53 @@ jobs:
         with:
           severity: warning
 
-      - name: Validate Kiwi XML
+      - name: Install validators
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libxml2-utils
-          xmllint --noout kiwi/config.xml
+          sudo apt-get install -y -qq libxml2-utils jq yamllint qml6-module-qtquick
 
-      - name: Validate JSON
+      - name: Validate Kiwi XML
+        run: xmllint --noout kiwi/config.xml
+
+      - name: Validate JSON (jq)
         run: |
-          for f in branding/plasma-look-and-feel/org.iolinux.desktop/metadata.json; do
-              python3 -c "import json,sys; json.load(open('$f'))"
+          set -euo pipefail
+          mapfile -t json_files < <(find . -type f -name '*.json' -not -path './.git/*')
+          for f in "${json_files[@]}"; do
+              echo "  jq . $f"
+              jq -e . "$f" >/dev/null
           done
+
+      - name: Validate YAML (yamllint)
+        run: |
+          cat > /tmp/yamllint.yml <<'YAML'
+          extends: default
+          rules:
+            line-length:
+              max: 120
+            document-start: disable
+          YAML
+          yamllint -c /tmp/yamllint.yml .github/
 
       - name: Validate SVG well-formedness
         run: |
-          for f in branding/wallpapers/io-default.svg branding/icons/io-logo.svg; do
+          set -euo pipefail
+          mapfile -t svgs < <(find branding -type f -name '*.svg')
+          for f in "${svgs[@]}"; do
+              echo "  xmllint --noout $f"
               xmllint --noout "$f"
+          done
+
+      - name: Validate QML (qmllint)
+        # qmllint is best-effort: warnings are surfaced but do not fail the
+        # build, since some Plasma-only imports aren't resolvable on CI.
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mapfile -t qmls < <(find . -type f -name '*.qml' -not -path './.git/*')
+          for f in "${qmls[@]}"; do
+              echo "  qmllint $f"
+              qmllint "$f" || true
           done
 
   # Nightly OBS rebuild — only runs on schedule or manual dispatch, and
@@ -74,7 +108,15 @@ jobs:
               echo "have_secrets=true" >> "$GITHUB_OUTPUT"
           else
               echo "have_secrets=false" >> "$GITHUB_OUTPUT"
-              echo "::warning::OBS_API_USER / OBS_API_PASS not configured — skipping nightly build."
+              # Warn-only on schedule (so a fresh fork's nightly cron doesn't
+              # spam failures); hard-fail on manual dispatch (the human asked
+              # for a build, they should know it didn't happen).
+              if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                  echo "::error::OBS_API_USER / OBS_API_PASS not configured."
+                  exit 1
+              else
+                  echo "::warning::OBS_API_USER / OBS_API_PASS not configured — skipping nightly build."
+              fi
           fi
 
       - name: Install osc
