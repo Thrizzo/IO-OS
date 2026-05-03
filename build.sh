@@ -53,9 +53,11 @@ stage_overlay() {
         ! -name '.gitignore' ! -name 'README.md' \
         -exec rm -rf {} +
 
-    # ---- Branding: color scheme ----
+    # ---- Branding: color schemes (dark + light) ----
     install -Dm644 "$ROOT/branding/colors/IO.colors" \
         "$OVERLAY/usr/share/color-schemes/IO.colors"
+    install -Dm644 "$ROOT/branding/colors/IO-light.colors" \
+        "$OVERLAY/usr/share/color-schemes/IO-light.colors"
 
     # ---- Branding: wallpaper (Plasma-recognised package layout) ----
     install -Dm644 "$ROOT/branding/wallpapers/io-default.svg" \
@@ -128,13 +130,47 @@ EOF
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/papierkorb.desktop" \
         "$OVERLAY/etc/skel/Desktop/papierkorb.desktop"
 
-    # ---- io-welcome (QML + launcher + autostart) ----
+    # ---- io-welcome (QML + strings + optional .qm + launcher + autostart) ----
     install -Dm644 "$ROOT/packages/io-welcome/qml/Main.qml" \
         "$OVERLAY/usr/share/io-welcome/Main.qml"
+    install -Dm644 "$ROOT/packages/io-welcome/qml/strings.js" \
+        "$OVERLAY/usr/share/io-welcome/strings.js"
+    # Optional: compiled translations. lrelease is invoked above only when
+    # the toolchain is present; if no .qm exists we still have strings.js
+    # as the fallback path so the welcome wizard always renders.
+    if [ -d "$ROOT/packages/io-welcome/i18n" ]; then
+        for qm in "$ROOT/packages/io-welcome/i18n"/*.qm; do
+            [ -f "$qm" ] || continue
+            install -Dm644 "$qm" \
+                "$OVERLAY/usr/share/io-welcome/i18n/$(basename "$qm")"
+        done
+    fi
     install -Dm755 "$ROOT/packages/io-welcome/io-welcome-launcher" \
         "$OVERLAY/usr/bin/io-welcome-launcher"
     install -Dm644 "$ROOT/packages/io-welcome/io-welcome.desktop" \
         "$OVERLAY/etc/xdg/autostart/io-welcome.desktop"
+}
+
+# --- step 1.5: optional Qt Linguist compile ------------------------------
+# If lrelease is on PATH, compile any io-welcome .ts files into .qm so the
+# wizard can use the QTranslator path; otherwise the JS strings module
+# (strings.js) is the fallback and nothing is missing.
+compile_translations() {
+    local ts_dir="$ROOT/packages/io-welcome/i18n"
+    [ -d "$ts_dir" ] || return 0
+    if command -v lrelease-qt6 >/dev/null 2>&1; then
+        local LRELEASE=lrelease-qt6
+    elif command -v lrelease >/dev/null 2>&1; then
+        local LRELEASE=lrelease
+    else
+        echo "==> Skipping translation compile (no lrelease on PATH)"
+        return 0
+    fi
+    echo "==> Compiling io-welcome translations"
+    for ts in "$ts_dir"/*.ts; do
+        [ -f "$ts" ] || continue
+        "$LRELEASE" "$ts" -qm "${ts%.ts}.qm" >/dev/null
+    done
 }
 
 # --- step 3: build --------------------------------------------------------
@@ -142,6 +178,7 @@ SUDO=""
 [ "$EUID" -ne 0 ] && SUDO="sudo"
 
 generate_pngs
+compile_translations
 stage_overlay
 
 echo "==> Building IO Linux ISO"
