@@ -22,10 +22,44 @@ ApplicationWindow {
     property bool german: true
     function t(de, en) { return german ? de : en }
 
+    // Open an external URL and surface a visible error if no browser
+    // is registered (Qt.openUrlExternally returns false on failure).
+    function openUrl(url) {
+        if (!Qt.openUrlExternally(url)) {
+            errorBanner.message = window.t(
+                "Konnte URL nicht öffnen — kein Standardbrowser installiert?",
+                "Could not open URL — no default browser installed?")
+            errorBanner.visible = true
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 36
         spacing: 24
+
+        // --- Inline error banner (hidden until something fails) ---
+        Rectangle {
+            id: errorBanner
+            property string message: ""
+            visible: false
+            Layout.fillWidth: true
+            Layout.preferredHeight: 36
+            color: "#3a1f1f"
+            border.color: "#E04F4F"
+            border.width: 1
+            radius: 4
+            Text {
+                anchors.fill: parent
+                anchors.margins: 8
+                text: errorBanner.message
+                color: "#F0F0F0"
+                font.pixelSize: 13
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+        }
 
         // --- Header: logo + title ---
         Image {
@@ -70,16 +104,16 @@ ApplicationWindow {
 
             Button {
                 text: window.t("Dokumentation", "Documentation")
-                onClicked: Qt.openUrlExternally("https://github.com/thrizzo/io-os")
+                onClicked: window.openUrl("https://github.com/thrizzo/io-os")
             }
             Button {
                 text: window.t("Mitwirken", "Contribute")
-                onClicked: Qt.openUrlExternally(
+                onClicked: window.openUrl(
                     "https://github.com/thrizzo/io-os/blob/main/CONTRIBUTING.md")
             }
             Button {
                 text: window.t("Roadmap", "Roadmap")
-                onClicked: Qt.openUrlExternally(
+                onClicked: window.openUrl(
                     "https://github.com/thrizzo/io-os/blob/main/docs/roadmap.md")
             }
         }

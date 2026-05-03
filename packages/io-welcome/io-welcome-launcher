@@ -5,7 +5,7 @@
 # the QML app via whichever Qt6 qml runtime is on PATH and persists the
 # opt-out if the app exited with code 42.
 
-set -eu
+set -euo pipefail
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/io-welcome"
 DISABLED="$CONFIG_DIR/disabled"
@@ -24,20 +24,30 @@ for candidate in qml6 qml; do
     fi
 done
 
+# Surface install issues via the desktop notification stack so users notice
+# instead of silently missing the welcome screen. kdialog is part of every
+# Plasma install; if it's also missing we fall back to stderr.
+notify() {
+    if command -v kdialog >/dev/null 2>&1; then
+        kdialog --title "IO Welcome" --passivepopup "$1" 5 || true
+    fi
+    echo "io-welcome: $1" >&2
+}
+
 if [ -z "$QML_BIN" ]; then
-    echo "io-welcome: no qml runtime found on PATH; skipping." >&2
+    notify "no qml runtime found on PATH; skipping."
     exit 0
 fi
 
 if [ ! -f "$QML_FILE" ]; then
-    echo "io-welcome: $QML_FILE not installed; skipping." >&2
+    notify "$QML_FILE not installed; skipping."
     exit 0
 fi
 
-set +e
-"$QML_BIN" "$QML_FILE"
-status=$?
-set -e
+# Disable -e around the QML runtime so we can read its exit code; pipefail
+# is harmless here (no pipeline) and stays on for any future additions.
+status=0
+"$QML_BIN" "$QML_FILE" || status=$?
 
 # 42 = user ticked "don't show on next start" before closing.
 if [ "$status" = "42" ]; then
