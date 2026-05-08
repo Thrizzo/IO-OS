@@ -68,11 +68,36 @@ User-visible strings in `packages/io-welcome/qml/Main.qml` are bilingual
 
 ## 5. Preinstalled Flatpaks
 
-Add or remove Flatpak refs in `kiwi/config.sh`. The current set is small
-on purpose: anything heavier should be installable post-boot from Discover
-or the (planned) IO Store.
+The default Flatpak picks (Brave, Thunderbird) are installed by the
+`io-firstboot-flatpak.service` oneshot at first boot, not baked into
+the ISO — keeps the image small. To change them:
 
-## 6. Re-publishing on your own OBS project
+- Edit the `ExecStart=` line in
+  `branding/firstboot/io-firstboot-flatpak.service`.
+- Update the corresponding pin in
+  `plasma-config/plasma-org.kde.plasma.desktop-appletsrc`.
+- Update the MIME defaults in `plasma-config/mimeapps.list`.
+- Update `packages/io-welcome/qml/strings.js` `defaultApps`.
+
+For an offline-first deployment, drop a
+`/etc/flatpak/installations.d/local.conf` that points at a local mirror
+and remove the network-online dependency from the firstboot service.
+
+## 6. Windows-binary policy
+
+Recipes for `.exe` / `.msi` apps live in
+`packages/io-run/recipes/*.yaml`. Each recipe carries:
+
+- `sha256` of the installer (lookup key)
+- `arch` (`32` or `64`)
+- `dll_overrides` (Wine-style override string)
+- `network` (`true`/`false`, controls bwrap `--unshare-net`)
+- `sandbox` (`strict` or `off`)
+
+Forks add their own recipes under the same path; `io-run` discovers
+them at runtime.
+
+## 7. Re-publishing on your own OBS project
 
 1. Create an OBS project (e.g. `home:<you>:<distro>`).
 2. Set repository `repository.opensuse.org/Kalpa` as a path source.
@@ -82,7 +107,7 @@ or the (planned) IO Store.
    `OBS_PROJECT` and `OBS_PACKAGE` to your project/package names, and the
    secrets `OBS_API_USER` / `OBS_API_PASS` to your OBS credentials.
 
-## 7. License obligations
+## 8. License obligations
 
 - Code: GPL-3.0-or-later — derivative works inherit.
 - Branding (wallpapers, logos, colors): CC-BY-SA-4.0 unless otherwise

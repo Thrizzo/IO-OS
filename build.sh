@@ -122,13 +122,72 @@ EOF
 
     # ---- Plasma config in /etc/skel/.config/ ----
     for f in plasma-org.kde.plasma.desktop-appletsrc kdeglobals kwinrc dolphinrc \
-             kglobalshortcutsrc; do
+             kglobalshortcutsrc mimeapps.list; do
         install -Dm644 "$ROOT/plasma-config/$f" "$OVERLAY/etc/skel/.config/$f"
     done
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/dieser-pc.desktop" \
         "$OVERLAY/etc/skel/Desktop/dieser-pc.desktop"
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/papierkorb.desktop" \
         "$OVERLAY/etc/skel/Desktop/papierkorb.desktop"
+
+    # ---- KWin scripts (Aero Shake et al.) ----
+    if [ -d "$ROOT/plasma-config/kwin-scripts" ]; then
+        for script in "$ROOT/plasma-config/kwin-scripts"/*/; do
+            [ -d "$script" ] || continue
+            local id
+            id=$(basename "$script")
+            install -Dm644 "$script/metadata.json" \
+                "$OVERLAY/usr/share/kwin/scripts/$id/metadata.json"
+            if [ -f "$script/contents/code/main.js" ]; then
+                install -Dm644 "$script/contents/code/main.js" \
+                    "$OVERLAY/usr/share/kwin/scripts/$id/contents/code/main.js"
+            fi
+        done
+    fi
+
+    # ---- Brave managed policy + autostart for io-firstboot Flatpak ----
+    install -Dm644 "$ROOT/branding/brave-policies/io-defaults.json" \
+        "$OVERLAY/etc/brave/policies/managed/io-defaults.json"
+    install -Dm644 "$ROOT/branding/firstboot/io-firstboot-flatpak.service" \
+        "$OVERLAY/etc/systemd/system/io-firstboot-flatpak.service"
+    install -dm755 "$OVERLAY/etc/systemd/system/multi-user.target.wants"
+    ln -sf ../io-firstboot-flatpak.service \
+        "$OVERLAY/etc/systemd/system/multi-user.target.wants/io-firstboot-flatpak.service"
+
+    # ---- Security drop-ins (DoT, firewalld, AppArmor, Wine FD limits) ----
+    install -Dm644 "$ROOT/branding/security/resolved/io-doh.conf" \
+        "$OVERLAY/etc/systemd/resolved.conf.d/io-doh.conf"
+    install -Dm644 "$ROOT/branding/security/firewalld/io-public.xml" \
+        "$OVERLAY/etc/firewalld/zones/public.xml"
+    install -Dm644 "$ROOT/branding/security/limits.d/99-io-wine.conf" \
+        "$OVERLAY/etc/security/limits.d/99-io-wine.conf"
+    install -Dm644 "$ROOT/branding/security/modules-load.d/io-ntsync.conf" \
+        "$OVERLAY/etc/modules-load.d/io-ntsync.conf"
+    for prof in "$ROOT/branding/security/apparmor"/*; do
+        [ -f "$prof" ] || continue
+        install -Dm644 "$prof" \
+            "$OVERLAY/etc/apparmor.d/$(basename "$prof")"
+    done
+
+    # ---- io-run dispatcher (Windows binary launcher) ----
+    install -Dm755 "$ROOT/packages/io-run/io-run" \
+        "$OVERLAY/usr/bin/io-run"
+    install -Dm755 "$ROOT/packages/io-run/io-run-prepare-templates" \
+        "$OVERLAY/usr/bin/io-run-prepare-templates"
+    install -Dm644 "$ROOT/packages/io-run/io-run.desktop" \
+        "$OVERLAY/usr/share/applications/io-run.desktop"
+    install -Dm644 "$ROOT/packages/io-run/io-run-prepare-templates.service" \
+        "$OVERLAY/usr/lib/systemd/user/io-run-prepare-templates.service"
+    install -dm755 "$OVERLAY/etc/skel/.config/systemd/user/default.target.wants"
+    ln -sf ../../../../../usr/lib/systemd/user/io-run-prepare-templates.service \
+        "$OVERLAY/etc/skel/.config/systemd/user/default.target.wants/io-run-prepare-templates.service"
+    if [ -d "$ROOT/packages/io-run/recipes" ]; then
+        for r in "$ROOT/packages/io-run/recipes"/*.yaml; do
+            [ -f "$r" ] || continue
+            install -Dm644 "$r" \
+                "$OVERLAY/usr/share/io-run/recipes/$(basename "$r")"
+        done
+    fi
 
     # ---- io-welcome (QML + strings + optional .qm + launcher + autostart) ----
     install -Dm644 "$ROOT/packages/io-welcome/qml/Main.qml" \

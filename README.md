@@ -23,7 +23,9 @@ sovereignty without sacrificing usability.
 
 - **Base:** openSUSE Kalpa (immutable, transactional updates)
 - **Desktop:** KDE Plasma 6, configured to feel familiar to Windows users
-- **Apps:** Flatpaks from Flathub (LibreOffice, Firefox, Thunderbird, …)
+- **Apps:** Flatpaks from Flathub (Brave, Thunderbird, LibreOffice, …)
+- **Windows binaries:** sandboxed via `io-run` (Wine + bwrap, per-app prefix)
+- **Security:** AppArmor + firewalld (deny-incoming) + DoT/DNSSEC by default
 - **Languages:** German (default) and English, both first-class
 
 ### Project status
@@ -109,7 +111,9 @@ Bedienbarkeit.
 
 - **Basis:** openSUSE Kalpa (unveränderlich, transaktionale Updates)
 - **Desktop:** KDE Plasma 6, für Windows-Anwender:innen angepasst
-- **Anwendungen:** Flatpaks aus Flathub (LibreOffice, Firefox, Thunderbird, …)
+- **Anwendungen:** Flatpaks aus Flathub (Brave, Thunderbird, LibreOffice, …)
+- **Windows-Programme:** über `io-run` sandboxed (Wine + bwrap)
+- **Sicherheit:** AppArmor + firewalld + DoT/DNSSEC standardmäßig
 - **Sprachen:** Deutsch (Standard) und Englisch, gleichrangig
 
 ### Projektstatus
