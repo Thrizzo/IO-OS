@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IO Linux firewalld zone — public.
+  Shipped to /etc/firewalld/zones/public.xml. Replaces the upstream
+  default-public to make IO's posture explicit:
+    - default action: drop, not reject (no useful info to scanners)
+    - inbound services: none
+    - ICMP echo: blocked (we do not respond to ping on public)
+    - outbound: unrestricted (only inbound is filtered)
+  Users on a trusted LAN should switch their NetworkManager profile to
+  the `home` zone, which leaves discovery (mDNS, SSDP) open.
+-->
+<zone target="DROP">
+    <short>IO Public</short>
+    <description>For use in untrusted networks. Drop everything inbound; do not reply to ping. Outbound traffic is unrestricted.</description>
+    <icmp-block name="echo-request"/>
+    <icmp-block name="timestamp-request"/>
+    <icmp-block name="address-mask-request"/>
+</zone>
