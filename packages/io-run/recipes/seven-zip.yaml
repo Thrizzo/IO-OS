@@ -1,0 +1,10 @@
+# IO Run recipe — 7-Zip 7z*.exe.
+# Pure-native PE; no .NET, no networking required for archiving.
+
+name: 7zip
+app_id: 7zip
+arch: 64
+sha256: 0000000000000000000000000000000000000000000000000000000000000000
+dll_overrides: mscoree=d;mshtml=d
+network: false
+sandbox: strict

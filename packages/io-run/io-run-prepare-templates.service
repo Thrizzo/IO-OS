@@ -1,0 +1,26 @@
+# systemd --user unit — runs once per user account to warm the Wine
+# prefix templates on first login. After=graphical-session.target so the
+# user is fully logged in (and has a writable XDG_DATA_HOME); After=
+# network-online doesn't apply because the warmer doesn't pull anything
+# from the network — it materialises a Wine prefix from already-installed
+# packages.
+#
+# Install: enabled by default via /etc/skel/.config/systemd/user/
+#          default.target.wants/io-run-prepare-templates.service.
+
+[Unit]
+Description=Pre-warm Wine prefix templates for IO Run
+ConditionPathIsDirectory=%h
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/io-run-prepare-templates
+# 5-minute hard cap; if Wine hangs we don't want to hold up later units.
+TimeoutStartSec=300
+RemainAfterExit=true
+Nice=10
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=default.target

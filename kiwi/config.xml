@@ -117,6 +117,26 @@
         <!-- Flatpak: primary user-app delivery channel per docs/architecture.md. -->
         <package name="flatpak"/>
 
+        <!-- Wine + Windows-binary stack. The dispatcher (io-run) sandboxes
+             these via bwrap; DXVK/VKD3D give DirectX→Vulkan translation. -->
+        <package name="wine"/>
+        <package name="wine-mono"/>
+        <package name="wine-gecko"/>
+        <package name="winetricks"/>
+        <package name="dxvk"/>
+        <package name="vkd3d-proton"/>
+        <package name="bubblewrap"/>
+        <package name="gamemode"/>
+        <package name="mangohud"/>
+        <package name="python3"/>
+
+        <!-- Security: AppArmor (MAC), firewalld (deny-inbound), DoT via
+             systemd-resolved (already part of systemd). -->
+        <package name="apparmor-parser"/>
+        <package name="apparmor-profiles"/>
+        <package name="apparmor-utils"/>
+        <package name="firewalld"/>
+
         <!-- Filesystems / partitioning support. -->
         <package name="parted"/>
         <package name="lvm2"/>

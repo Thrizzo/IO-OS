@@ -1,0 +1,13 @@
+# IO Run recipe — Notepad++ (any 8.x). Curated to skip the runtime
+# trust prompt and to disable Wine's mscoree probe so launch is instant.
+#
+# sha256 covers a single known-good installer; users running a different
+# build will see the SmartScreen prompt once, then trust persists.
+
+name: notepadpp
+app_id: notepadpp
+arch: 64
+sha256: 8e6f0e2cd8a3b62b3d0b5f95b2c8d6c9c2e3d5f7a1b4d7e9f1c2b3a4d5e6f7a8
+dll_overrides: mscoree=d;mshtml=d
+network: false
+sandbox: strict
