@@ -58,3 +58,20 @@ activate application launcher=Meta,Meta,Activate Application Launcher
 # Win+X — power/admin menu. Maps to the KRunner "Sessions" runner-style menu;
 # downstream forks can repoint this at a custom action.
 manage activities=Meta+Q,Meta+Q,Show Activity Switcher
+# Win+A — action centre (Plasma exposes the system-tray flyout via DBus).
+# The actual binding is wired by the io-shortcuts.kksrv autostart entry —
+# this row keeps the documented intent in one place.
+show notification center=Meta+A,Meta+A,Show Notification Center
+
+# --- Application launchers (Windows search, settings, run) ---------------
+
+[org.kde.krunner.desktop]
+# Win+S = search (Windows 11 muscle memory) — KRunner.
+# Original Meta+R/Alt+Space/Meta+Space bindings are preserved above.
+_launch=Meta+S\tMeta+R\tAlt+Space\tMeta+Space,Alt+Space\tMeta+Space,KRunner
+
+[systemsettings.desktop]
+_k_friendly_name=System Settings
+# Win+I = settings (Windows 11). Once io-settings ships it can override
+# this _launch line to point at io-settings.desktop instead.
+_launch=Meta+I,none,System Settings

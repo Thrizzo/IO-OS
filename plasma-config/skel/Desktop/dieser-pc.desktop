@@ -1,8 +1,14 @@
 [Desktop Entry]
-Type=Link
-URL=file:///
+Type=Application
+Exec=dolphin "remote:/" "place:/?type=devices" file:///run/media file:///home %U
 Icon=computer
 Name=This PC
 Name[de]=Dieser PC
-Comment=Browse the file system
-Comment[de]=Dateisystem durchsuchen
+Comment=Browse drives, devices, and network places
+Comment[de]=Laufwerke, Geräte und Netzwerkfreigaben durchsuchen
+Terminal=false
+StartupNotify=true
+Categories=Utility;FileTools;FileManager;
+# Open with Dolphin in tabs across the spots that match Windows' "This PC"
+# (mounted devices) and quick access (home + media). When dolphin isn't
+# present (live failsafe) the URL handler falls back to plain file:///.

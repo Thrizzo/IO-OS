@@ -142,10 +142,10 @@ function tr(locale, key) {
 // Suggested defaults for the apps page. Kept here (not in QML) so a fork
 // can change the picks without touching code.
 var defaultApps = {
-    browser:  "firefox",
-    mail:     "thunderbird",
-    files:    "dolphin",
-    terminal: "konsole"
+    browser:  "Brave",
+    mail:     "Thunderbird",
+    files:    "Dolphin",
+    terminal: "Konsole"
 };
 
 // External links for the docs row on the welcome page.
