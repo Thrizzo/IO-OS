@@ -7,7 +7,8 @@ License=CC-BY-SA-4.0
 Type=sddm-theme
 Version=0.1.0
 Website=https://github.com/thrizzo/io-os
-Screenshot=preview.png
+# Screenshot is intentionally omitted — see branding/sddm/io/README.md for
+# regeneration instructions. Re-add once preview.png is committed.
 MainScript=Main.qml
 ConfigFile=theme.conf
 TranslationsDirectory=translations

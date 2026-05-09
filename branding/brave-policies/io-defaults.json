@@ -1,0 +1,52 @@
+{
+    "_comment": [
+        "Brave managed-policy file shipped at /etc/brave/policies/managed/.",
+        "Schema: https://chromeenterprise.google/policies/ + Brave-specific keys.",
+        "Goal: telemetry off, privacy defaults max, Brave Search as default,",
+        "no autofill of credentials, no sync nag. Users can still flip these",
+        "manually if they want — managed != mandatory unless we list under",
+        "'recommended' instead of top-level."
+    ],
+
+    "BraveStatsPingEnabled": false,
+    "BraveP3AEnabled": false,
+    "BraveAdsEnabled": false,
+    "BraveRewardsDisabled": true,
+    "BraveSyncDisabled": true,
+    "BraveTalkDisabled": false,
+    "BraveWalletDisabled": true,
+    "TorDisabled": false,
+
+    "MetricsReportingEnabled": false,
+    "DefaultBrowserSettingEnabled": false,
+    "PromotionalTabsEnabled": false,
+    "WelcomePageOnOSUpgradeEnabled": false,
+    "SearchSuggestEnabled": false,
+    "SafeBrowsingExtendedReportingEnabled": false,
+    "SpellCheckServiceEnabled": false,
+    "AlternateErrorPagesEnabled": false,
+
+    "DefaultSearchProviderEnabled": true,
+    "DefaultSearchProviderName": "Brave Search",
+    "DefaultSearchProviderKeyword": "brave",
+    "DefaultSearchProviderSearchURL": "https://search.brave.com/search?q={searchTerms}",
+    "DefaultSearchProviderSuggestURL": "",
+
+    "PasswordManagerEnabled": true,
+    "AutofillAddressEnabled": false,
+    "AutofillCreditCardEnabled": false,
+
+    "BlockThirdPartyCookies": true,
+    "DefaultCookiesSetting": 4,
+    "BackgroundModeEnabled": false,
+    "NetworkPredictionOptions": 2,
+
+    "HomepageLocation": "https://search.brave.com/",
+    "HomepageIsNewTabPage": false,
+    "NewTabPageLocation": "chrome://newtab",
+    "BookmarkBarEnabled": true,
+
+    "ExtensionInstallSources": [],
+    "ExtensionInstallBlocklist": [],
+    "DeveloperToolsAvailability": 1
+}

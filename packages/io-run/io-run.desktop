@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=IO Run
+Name[de]=IO Ausführen
+GenericName=Windows binary launcher
+GenericName[de]=Windows-Programmstarter
+Comment=Run Windows .exe and .msi files via Wine, sandboxed
+Comment[de]=Windows-EXE/MSI-Dateien über Wine ausführen (sandboxed)
+Exec=io-run %f
+Icon=wine
+Terminal=false
+NoDisplay=false
+Categories=Utility;System;
+MimeType=application/x-msdownload;application/x-msi;application/x-ms-dos-executable;application/x-ms-shortcut;application/vnd.microsoft.portable-executable;
+StartupNotify=true

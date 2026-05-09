@@ -1,4 +1,14 @@
 [General]
+# IO palette — single source of truth for the Plasma color scheme.
+# Hex equivalents (kept in sync with branding/sddm/io/theme.conf and
+# branding/plymouth/io/io.script):
+#   #1a2332  =  26, 35, 50    primary background (deep navy)
+#   #243047  =  36, 48, 71    raised surface
+#   #2e3d56  =  46, 61, 86    alt surface
+#   #D4A24A  = 212,162, 74    accent / brand amber
+#   #E0B569  = 224,181,105    accent hover
+#   #F0F0F0  = 240,240,240    foreground / text
+#   #A0A8B5  = 160,168,181    disabled / secondary text
 Name=IO
 shadeSortColumn=true
 

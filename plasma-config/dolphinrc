@@ -9,15 +9,37 @@ ShowFullPath=false
 ShowFullPathInTitlebarV2=false
 RememberOpenedTabs=true
 SplitView=false
+# Show full path on hover so users always know where they are.
+ShowToolTips=true
+# Open new windows for new top-level folders, but keep tabs the default.
+BrowseThroughArchives=true
+# Confirm large/destructive operations — closer to Windows behaviour than
+# Dolphin's silent default.
+ConfirmClosingMultipleTabs=true
+ConfirmClosingTerminalRunningProgram=true
+
+[DetailsMode]
+# Detail view (filename, size, date, type) is what Windows Explorer shows
+# by default. Users can still switch to Icons via Ctrl+1.
+PreviewSize=22
+SidePadding=4
 
 [KFileDialog Settings]
 # Sidebar (Places panel) visible by default — Windows' "This PC" sidebar
 # equivalent.
 Show Bookmarks=true
 Show hidden files=false
+Show Speedbar=true
+View Style=DetailTree
 
 [MainWindow]
 ToolBarsMovable=Disabled
+MenuBar=Disabled
+
+[VersionControl]
+# Don't probe every folder for git/svn metadata — keeps Dolphin snappy on
+# large home directories.
+enabledPlugins=
 
 [PreviewSettings]
 Plugins=appimagethumbnail,audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,opendocumentthumbnail,svgthumbnail,textthumbnail,windowsexethumbnail,windowsimagethumbnail

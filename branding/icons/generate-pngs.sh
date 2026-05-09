@@ -24,10 +24,23 @@ else
     exit 1
 fi
 
+# Skip rasterization when an up-to-date PNG already exists. The SVG is the
+# source of truth — touching it (or any newer mtime) invalidates the cache.
+needs_rebuild() {
+    local out="$1"
+    [ ! -f "$out" ] && return 0
+    [ "$SRC" -nt "$out" ] && return 0
+    return 1
+}
+
 for s in "${SIZES[@]}"; do
     out="$OUT/io-logo-${s}.png"
-    echo "  ${s}x${s}  ->  ${out}"
-    convert "$s" "$out"
+    if needs_rebuild "$out"; then
+        echo "  ${s}x${s}  ->  ${out}"
+        convert "$s" "$out"
+    else
+        echo "  ${s}x${s}  ->  ${out} (cached)"
+    fi
 done
 
 echo "Done. PNGs in $OUT/"

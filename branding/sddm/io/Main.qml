@@ -2,8 +2,13 @@
 // Minimum-viable: backdrop, user dropdown, password field, session selector,
 // language toggle, login button. Validated against Plasma 6 / SDDM 0.21 API.
 //
-// Known gap: this is alpha QML. Expect to iterate after first boot — there
-// is no substitute for testing against a real SDDM greeter session.
+// Locale-switch caveat: SDDM 0.21 does not expose a public API for a theme
+// to change the *user session's* locale (LANG / LC_*). What we can do is
+// re-render the greeter strings live; the actual session locale is decided
+// at install time by Calamares and at runtime by the user's `~/.dmrc` /
+// `~/.config/plasma-localerc`. When SDDM exposes a locale API upstream
+// we'll wire this combo to it; for now the toggle is honest about its
+// scope (login screen text only).
 
 import QtQuick
 import QtQuick.Controls
@@ -14,6 +19,13 @@ Rectangle {
     width: 1920
     height: 1080
     color: config.PrimaryColor || "#1a2332"
+
+    // "de" or "en". Defaults to whichever ships first in the locale list.
+    property string locale: "de"
+
+    // Tiny helper so every translated string lives in one place. Keeps the
+    // signature symmetric with packages/io-welcome (window.tr()).
+    function tr(de, en) { return locale === "de" ? de : en }
 
     // Backdrop wallpaper.
     Image {
@@ -57,7 +69,7 @@ Rectangle {
             id: passwordBox
             Layout.fillWidth: true
             echoMode: TextInput.Password
-            placeholderText: qsTr("Passwort / Password")
+            placeholderText: tr("Passwort", "Password")
             color: config.TextColor || "#F0F0F0"
             Keys.onReturnPressed: tryLogin()
         }
@@ -79,12 +91,14 @@ Rectangle {
                 visible: config.ShowLanguages !== "false"
                 Layout.fillWidth: true
                 model: ["Deutsch", "English"]
-                currentIndex: 0
+                currentIndex: root.locale === "de" ? 0 : 1
+                // Live-switch every translated string in the greeter.
+                onActivated: root.locale = (currentIndex === 0 ? "de" : "en")
             }
 
             Button {
                 id: loginButton
-                text: qsTr("Anmelden / Sign in")
+                text: tr("Anmelden", "Sign in")
                 Layout.fillWidth: true
                 onClicked: tryLogin()
             }
@@ -110,7 +124,7 @@ Rectangle {
         target: sddm
         function onLoginFailed() {
             passwordBox.text = ""
-            errorText.text = qsTr("Anmeldung fehlgeschlagen / Login failed")
+            errorText.text = tr("Anmeldung fehlgeschlagen", "Login failed")
         }
         function onLoginSucceeded() {
             errorText.text = ""

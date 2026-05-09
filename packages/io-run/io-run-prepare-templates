@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# io-run-prepare-templates — populate ~/.local/share/io-run/templates/
+# with a 32- and 64-bit Wine prefix at first login. The dispatcher
+# clones these (cp --reflink=auto) on first launch of any .exe so the
+# user-visible cold-start drops from ~30s to <1s.
+#
+# Idempotent: skips silently if the templates already exist. Runs as
+# the regular user via a systemd --user oneshot (see .service file).
+
+set -euo pipefail
+
+TEMPLATE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/io-run/templates"
+mkdir -p "$TEMPLATE_DIR"
+
+prepare() {
+    local arch="$1"        # 32 | 64
+    local target="$TEMPLATE_DIR/win${arch}"
+    if [ -d "$target" ] && [ -d "$target/drive_c" ]; then
+        echo "io-run: template win${arch} already prepared, skipping."
+        return 0
+    fi
+    echo "io-run: warming Wine win${arch} template at $target"
+    rm -rf "$target"
+    mkdir -p "$target"
+    WINEPREFIX="$target" \
+    WINEARCH="win${arch}" \
+    WINEDEBUG=-all \
+    WINEDLLOVERRIDES="winemenubuilder.exe=d;mscoree=d;mshtml=d" \
+        wineboot --init >/dev/null 2>&1 || {
+            echo "io-run: wineboot failed for win${arch}, leaving partial template" >&2
+            return 1
+        }
+    # Pre-load DXVK + VKD3D-Proton DLLs into the template so games skip
+    # the runtime install. Both are optional — succeed without them.
+    if command -v setup_dxvk >/dev/null 2>&1; then
+        WINEPREFIX="$target" setup_dxvk install >/dev/null 2>&1 || true
+    fi
+    if command -v setup_vkd3d_proton >/dev/null 2>&1; then
+        WINEPREFIX="$target" setup_vkd3d_proton install >/dev/null 2>&1 || true
+    fi
+    # Drop a marker so the dispatcher knows the template is "complete".
+    touch "$target/.io-run-template-ready"
+}
+
+if ! command -v wineboot >/dev/null 2>&1; then
+    echo "io-run: wineboot missing — Wine package not installed yet." >&2
+    exit 0   # not fatal; dispatcher will fall back to slow path
+fi
+
+prepare 64
+prepare 32
+
+echo "io-run: templates ready in $TEMPLATE_DIR"

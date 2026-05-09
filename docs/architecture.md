@@ -71,3 +71,45 @@ versa.
 - A custom installer (we use openSUSE's existing Calamares-based flow).
 - The Windows compatibility layer, IO Store, IO VPN Manager, or Apple-format
   bundle — see `docs/roadmap.md` for v0.2–v0.5.
+
+## Why these choices (and not the alternatives)
+
+### Why Plasma, not GNOME?
+
+GNOME's design language deliberately diverges from Windows: hot corners,
+no taskbar by default, no minimise/maximise buttons until you install an
+extension. Plasma 6 ships with a Windows-shaped panel, a Start-menu
+launcher, and standard window controls — much less work to make it feel
+familiar to migrants from Windows. It also exposes far more configuration
+through declarative files (`kwinrc`, `kglobalshortcutsrc`,
+`plasma-org.kde.plasma.desktop-appletsrc`), which is what lets us ship
+opinionated defaults without forking the desktop.
+
+### Why Kalpa, not plain Tumbleweed or Leap?
+
+Kalpa is openSUSE's immutable Plasma desktop — it gives us
+`transactional-update`, `btrfs` snapshots, and Flatpak-by-default for free.
+A KRITIS-targeted distribution needs atomic, rollbackable updates; building
+that on top of Tumbleweed manually would mean re-implementing what Kalpa
+already provides. Leap is too conservative for a desktop that wants
+current Plasma 6.
+
+### Why Kiwi-NG, not osbuild / mkosi / Image Builder?
+
+Kiwi-NG is the canonical openSUSE image builder — every official openSUSE
+ISO is built with it. Using anything else would force us to maintain a
+package list outside of OBS's view and lose the nightly OBS rebuild story.
+
+### Why Flatpak, not Snap or AppImage?
+
+Snap is single-vendor (Canonical) and its server is proprietary. AppImage
+has no sandboxing or update story. Flatpak is the cross-distribution
+standard, ships with Kalpa, and Flathub already carries the apps our
+target users need (LibreOffice, Firefox, Thunderbird).
+
+### Why no custom kernel?
+
+A custom kernel is a permanent maintenance tax for marginal gain. We
+accept openSUSE's kernel as-is; if a hardware-vendor partnership later
+demands an out-of-tree driver, we'll ship it as a DKMS module rather than
+a kernel fork.

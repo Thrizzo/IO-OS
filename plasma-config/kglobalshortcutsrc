@@ -1,0 +1,77 @@
+# Global shortcuts shipped to /etc/skel/.config/.
+# These map Windows-key conventions onto Plasma 6 / KWin so users coming
+# from Windows find their muscle memory works on day one.
+#
+# Format: each [section] is either a .desktop file (launcher) or a KDE
+# component name. Each key=A,B,C reads as: A=current binding, B=default
+# binding (or "none"), C=human-readable action name.
+
+# --- Launchers (Meta+letter) ---------------------------------------------
+
+[org.kde.dolphin.desktop]
+_k_friendly_name=Dolphin
+_launch=Meta+E,none,Dolphin
+
+[org.kde.krunner.desktop]
+_k_friendly_name=KRunner
+_launch=Meta+R\tAlt+Space\tMeta+Space,Alt+Space\tMeta+Space,KRunner
+
+[org.kde.konsole.desktop]
+_k_friendly_name=Konsole
+_launch=Ctrl+Alt+T,none,Konsole
+
+# --- Session: lock, switch user (Win+L) ----------------------------------
+
+[ksmserver]
+_k_friendly_name=Session Management
+Lock Session=Meta+L\tScreensaver,Screensaver,Lock Session
+Log Out=Ctrl+Alt+Del,Ctrl+Alt+Del,Log Out
+
+# --- KWin: window management & Windows-style tiling ----------------------
+
+[kwin]
+_k_friendly_name=KWin
+# Win+D — show / hide desktop (Windows parity).
+Show Desktop=Meta+D,Meta+D,Peek at Desktop
+# Snap-assist via Meta+Arrow (Windows 11 muscle memory).
+Window Quick Tile Left=Meta+Left,Meta+Left,Quick Tile Window to the Left
+Window Quick Tile Right=Meta+Right,Meta+Right,Quick Tile Window to the Right
+Window Quick Tile Top=Meta+Up,Meta+Up,Quick Tile Window to the Top
+Window Quick Tile Bottom=Meta+Down,Meta+Down,Quick Tile Window to the Bottom
+# Win+Tab — task view (KWin Overview effect).
+Overview=Meta+Tab,none,Toggle Overview
+# Maximise / minimise / close (Plasma defaults are kept; listed for clarity).
+Window Maximize=Meta+PgUp,Meta+PgUp,Maximize Window
+Window Minimize=Meta+PgDown,Meta+PgDown,Minimize Window
+Window Close=Alt+F4,Alt+F4,Close Window
+# Walk through windows like Windows Alt+Tab thumbnails (Plasma default,
+# pinned here so a dist-upgrade can't quietly remove it).
+Walk Through Windows=Alt+Tab,Alt+Tab,Walk Through Windows
+Walk Through Windows (Reverse)=Alt+Shift+Tab,Alt+Shift+Tab,Walk Through Windows (Reverse)
+
+# --- Plasma shell: Start menu, action menu (Win, Win+X) ------------------
+
+[plasmashell]
+_k_friendly_name=Plasma
+# Tap-Meta opens the application launcher (Windows Start menu equivalent).
+activate application launcher=Meta,Meta,Activate Application Launcher
+# Win+X — power/admin menu. Maps to the KRunner "Sessions" runner-style menu;
+# downstream forks can repoint this at a custom action.
+manage activities=Meta+Q,Meta+Q,Show Activity Switcher
+# Win+A — action centre (Plasma exposes the system-tray flyout via DBus).
+# The actual binding is wired by the io-shortcuts.kksrv autostart entry —
+# this row keeps the documented intent in one place.
+show notification center=Meta+A,Meta+A,Show Notification Center
+
+# --- Application launchers (Windows search, settings, run) ---------------
+
+[org.kde.krunner.desktop]
+# Win+S = search (Windows 11 muscle memory) — KRunner.
+# Original Meta+R/Alt+Space/Meta+Space bindings are preserved above.
+_launch=Meta+S\tMeta+R\tAlt+Space\tMeta+Space,Alt+Space\tMeta+Space,KRunner
+
+[systemsettings.desktop]
+_k_friendly_name=System Settings
+# Win+I = settings (Windows 11). Once io-settings ships it can override
+# this _launch line to point at io-settings.desktop instead.
+_launch=Meta+I,none,System Settings

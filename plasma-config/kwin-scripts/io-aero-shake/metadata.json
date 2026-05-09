@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [{"Name": "The IO Linux contributors"}],
+        "Description": "Shake the active window to minimise everything else (Aero Shake parity).",
+        "Description[de]": "Aktives Fenster schütteln, um alle anderen zu minimieren (Aero Shake).",
+        "Id": "io-aero-shake",
+        "License": "GPL-3.0-or-later",
+        "Name": "IO Aero Shake",
+        "Name[de]": "IO Aero Shake",
+        "Version": "0.1.0",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js"
+}

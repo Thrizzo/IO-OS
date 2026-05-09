@@ -4,6 +4,14 @@
 [General]
 # Apply our color scheme out of the box (see branding/colors/IO.colors).
 ColorScheme=IO
+# Segoe UI is the Windows system font; Inter and Selawik are open-source
+# substitutes that match its metrics closely. Listed in fallback order so
+# whichever the user (or Kalpa) installs first wins.
+font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,Regular
+fixed=JetBrains Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,Regular
+menuFont=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,Regular
+smallestReadableFont=Inter,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,Regular
+toolBarFont=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,Regular
 
 [KDE]
 # Switch the global look-and-feel to IO; pulls in splash, cursor, decoration.

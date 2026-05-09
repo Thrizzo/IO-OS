@@ -19,3 +19,26 @@ AutoRaise=false
 # Keep compositing on (Plasma defaults). Disabling it silently breaks too much.
 Enabled=true
 OpenGLIsUnsafe=false
+
+[Windows]
+# (continued from above) Snap-on-edge: dragging a window to a screen edge
+# tiles it, mirroring Windows 7+ Aero Snap. ElectricBorders=1 means active
+# only when the window is actually being dragged.
+ElectricBorders=1
+ElectricBorderCornerRatio=0.25
+ElectricBorderDelay=150
+
+[Plugins]
+# Overview = Win+Tab task view; bind in kglobalshortcutsrc.
+overviewEnabled=true
+# Subtle window minimise / maximise animation, like Windows DWM.
+slideEnabled=true
+# Highlight focused window briefly when alt-tabbing, mirrors Windows.
+highlightwindowEnabled=true
+
+[TabBox]
+# Alt+Tab uses thumbnail grid layout — closest to Windows' alt-tab UI.
+LayoutName=thumbnail_grid
+HighlightWindows=true
+ShowDesktopMode=DoNotShowDesktopClient
+ShowTabBox=true

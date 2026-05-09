@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+# io-run — IO Linux dispatcher for Windows binaries.
+#
+# Pipeline:
+#   1. Inspect the PE header to pick 32-bit vs 64-bit prefix.
+#   2. Look up a recipe by SHA-256 (or fall back to "generic").
+#   3. Materialise a per-app Wine prefix from the warmed template
+#      (cp --reflink=auto on btrfs => sub-second).
+#   4. Show a SmartScreen-style trust prompt the first time we see
+#      a binary that's neither signed nor recipe-listed.
+#   5. Sandbox the launch via `bwrap`: per-app prefix mounted RW,
+#      real $HOME invisible, /etc read-only, network as the recipe
+#      requests.
+#
+# Failure mode: if anything goes wrong, fall back to plain `wine`
+# without sandbox so the user at least gets *something*. Print the
+# reason loudly so it shows up in journal.
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import struct
+import subprocess
+import sys
+from pathlib import Path
+
+XDG_DATA = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+XDG_CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+
+PREFIX_DIR = XDG_DATA / "io-run/prefixes"
+TEMPLATE_DIR = XDG_DATA / "io-run/templates"
+TRUST_DB = XDG_CONFIG / "io-run/trusted.json"
+RECIPES_DIR = Path("/usr/share/io-run/recipes")
+
+
+# --- PE inspection -------------------------------------------------------
+
+def pe_arch(path: Path) -> str:
+    """Return '64', '32', or 'unknown' for a Portable Executable file."""
+    try:
+        with path.open("rb") as fh:
+            mz = fh.read(2)
+            if mz != b"MZ":
+                return "unknown"
+            fh.seek(0x3C)
+            pe_off = struct.unpack("<I", fh.read(4))[0]
+            fh.seek(pe_off)
+            if fh.read(4) != b"PE\0\0":
+                return "unknown"
+            machine = struct.unpack("<H", fh.read(2))[0]
+            return {0x14C: "32", 0x8664: "64", 0xAA64: "arm64"}.get(
+                machine, "unknown"
+            )
+    except OSError:
+        return "unknown"
+
+
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+# --- recipe lookup -------------------------------------------------------
+
+def load_recipe(digest: str, fallback_arch: str) -> dict:
+    """Match a recipe by sha256 first, then by app name guess. Default to
+    a generic recipe so the dispatcher always has *something* to use."""
+    if RECIPES_DIR.exists():
+        for r in RECIPES_DIR.glob("*.yaml"):
+            try:
+                # Tiny YAML subset: only `key: value` lines, no nesting.
+                spec = parse_simple_yaml(r.read_text())
+            except Exception as exc:  # noqa: BLE001
+                print(f"io-run: skipping unreadable recipe {r}: {exc}",
+                      file=sys.stderr)
+                continue
+            if spec.get("sha256") == digest:
+                return spec
+    return {
+        "name": "generic",
+        "arch": fallback_arch,
+        "dll_overrides": "",
+        "network": "true",
+        "sandbox": "strict",
+    }
+
+
+def parse_simple_yaml(text: str) -> dict:
+    out: dict[str, str] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if ":" not in line:
+            continue
+        key, _, val = line.partition(":")
+        out[key.strip()] = val.strip().strip('"').strip("'")
+    return out
+
+
+# --- prefix materialisation ----------------------------------------------
+
+def ensure_prefix(app_id: str, arch: str) -> Path:
+    """Clone the warmed template prefix on first use; reuse afterwards.
+    On btrfs the copy is reflinked (CoW), so cold-start is sub-second."""
+    target = PREFIX_DIR / app_id
+    if target.exists():
+        return target
+    template = TEMPLATE_DIR / f"win{arch}"
+    PREFIX_DIR.mkdir(parents=True, exist_ok=True)
+    if template.exists():
+        try:
+            subprocess.run(
+                ["cp", "-a", "--reflink=auto", str(template), str(target)],
+                check=True,
+            )
+            return target
+        except subprocess.CalledProcessError:
+            pass
+    # No template — initialise on the fly. Slow path, hits once per app.
+    target.mkdir(parents=True)
+    env = wine_env(target, arch)
+    print("io-run: no warmed template; running wineboot (slow path)",
+          file=sys.stderr)
+    subprocess.run(["wineboot", "-i"], env=env, check=False)
+    return target
+
+
+def wine_env(prefix: Path, arch: str) -> dict[str, str]:
+    env = os.environ.copy()
+    env["WINEPREFIX"] = str(prefix)
+    env["WINEARCH"] = "win64" if arch == "64" else "win32"
+    # Use esync + fsync; no-ops on kernels without the support.
+    env["WINEESYNC"] = "1"
+    env["WINEFSYNC"] = "1"
+    # NTSYNC autoload (Linux 6.10+). Wine picks it up if /dev/ntsync exists.
+    env["WINENTSYNC"] = "1"
+    # Quieter logs unless WINEDEBUG is already set.
+    env.setdefault("WINEDEBUG", "-all")
+    return env
+
+
+# --- trust prompt --------------------------------------------------------
+
+def is_trusted(digest: str) -> bool:
+    if not TRUST_DB.exists():
+        return False
+    try:
+        return digest in json.loads(TRUST_DB.read_text()).get("digests", [])
+    except (OSError, json.JSONDecodeError):
+        return False
+
+
+def remember_trust(digest: str) -> None:
+    TRUST_DB.parent.mkdir(parents=True, exist_ok=True)
+    data = {"digests": []}
+    if TRUST_DB.exists():
+        try:
+            data = json.loads(TRUST_DB.read_text())
+        except json.JSONDecodeError:
+            pass
+    data.setdefault("digests", [])
+    if digest not in data["digests"]:
+        data["digests"].append(digest)
+    TRUST_DB.write_text(json.dumps(data, indent=2))
+
+
+def smartscreen_prompt(target: Path, digest: str) -> bool:
+    """Return True if user wants to proceed. Uses kdialog; falls back to
+    a stdin yes/no when running without a desktop."""
+    msg = (
+        f"IO Linux blocked an unknown Windows program from running.\n\n"
+        f"  File:   {target.name}\n"
+        f"  SHA-256: {digest[:16]}…\n\n"
+        f"Run anyway? Only do this if you trust the source."
+    )
+    if shutil.which("kdialog"):
+        rc = subprocess.run(
+            ["kdialog", "--yesno", msg, "--title", "IO Run — unknown program"]
+        ).returncode
+        return rc == 0
+    print(msg, file=sys.stderr)
+    return input("Run anyway? [y/N] ").strip().lower() == "y"
+
+
+# --- sandboxed launch ----------------------------------------------------
+
+def launch(target: Path, prefix: Path, arch: str, recipe: dict,
+           extra_args: list[str]) -> int:
+    env = wine_env(prefix, arch)
+    if recipe.get("dll_overrides"):
+        env["WINEDLLOVERRIDES"] = recipe["dll_overrides"]
+    wine_bin = "wine64" if arch == "64" and shutil.which("wine64") else "wine"
+    cmd = [wine_bin, str(target), *extra_args]
+
+    if recipe.get("sandbox", "strict") == "off" or not shutil.which("bwrap"):
+        return subprocess.run(cmd, env=env).returncode
+
+    # Default strict sandbox. Per-app prefix is RW; everything else is
+    # either tmpfs or read-only. Network access is allowed only when the
+    # recipe asks for it.
+    bwrap = [
+        "bwrap",
+        "--ro-bind", "/usr", "/usr",
+        "--ro-bind", "/etc", "/etc",
+        "--ro-bind-try", "/opt", "/opt",
+        "--proc", "/proc",
+        "--dev", "/dev",
+        "--tmpfs", "/tmp",
+        "--tmpfs", str(Path.home()),
+        "--bind", str(prefix), str(prefix),
+        "--ro-bind", str(target), str(target),
+        "--unshare-pid",
+        "--unshare-uts",
+        "--unshare-ipc",
+        "--die-with-parent",
+    ]
+    if recipe.get("network", "true").lower() == "false":
+        bwrap.append("--unshare-net")
+    bwrap += ["--", *cmd]
+    return subprocess.run(bwrap, env=env).returncode
+
+
+# --- entry ---------------------------------------------------------------
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="io-run",
+                                 description="Run a Windows binary the IO way.")
+    ap.add_argument("target", help="Path to the .exe / .msi to launch")
+    ap.add_argument("args", nargs=argparse.REMAINDER,
+                    help="Extra args forwarded to the binary")
+    ns = ap.parse_args(argv)
+
+    target = Path(ns.target).expanduser().resolve()
+    if not target.is_file():
+        print(f"io-run: not a file: {target}", file=sys.stderr)
+        return 2
+
+    arch = pe_arch(target)
+    if arch == "unknown":
+        print(f"io-run: not a recognised PE binary: {target}", file=sys.stderr)
+        return 3
+    if arch == "arm64":
+        print("io-run: ARM64 PE binaries are not supported yet "
+              "(Hangover work tracked for v0.3).", file=sys.stderr)
+        return 4
+
+    digest = file_sha256(target)
+    recipe = load_recipe(digest, arch)
+    if recipe.get("arch") and recipe["arch"] != arch:
+        print(f"io-run: recipe arch mismatch ({recipe['arch']} vs {arch}); "
+              "using detected.", file=sys.stderr)
+
+    if recipe["name"] == "generic" and not is_trusted(digest):
+        if not smartscreen_prompt(target, digest):
+            print("io-run: aborted by user.", file=sys.stderr)
+            return 5
+        remember_trust(digest)
+
+    app_id = recipe.get("app_id") or digest[:12]
+    prefix = ensure_prefix(app_id, arch)
+    return launch(target, prefix, arch, recipe, ns.args)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

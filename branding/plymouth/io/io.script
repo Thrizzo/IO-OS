@@ -4,7 +4,9 @@
 // gives both at once.
 
 // --- Background -----------------------------------------------------------
-Window.SetBackgroundTopColor   (0.10, 0.14, 0.20);  // #1a2332-ish top
+// Colours are 0.0–1.0 normalised RGB. See branding/colors/IO.colors for the
+// canonical palette; values below should match those hexes.
+Window.SetBackgroundTopColor   (0.10, 0.14, 0.20);  // #1a2332 primary navy
 Window.SetBackgroundBottomColor(0.05, 0.07, 0.12);  // slightly darker bottom
 
 screen_w = Window.GetWidth();
@@ -47,7 +49,7 @@ Plymouth.SetRefreshFunction(refresh_callback);
 fun progress_callback(time, progress) {
     fill_w = bar.w * progress;
     if (fill_w < 1) fill_w = 1;
-    bar.fg_sprite.SetImage(Image.Text("", 0.83, 0.64, 0.29, 1));   // #D4A24A
+    bar.fg_sprite.SetImage(Image.Text("", 0.83, 0.64, 0.29, 1));   // #D4A24A accent amber (see IO.colors)
     // Plymouth's scripting can't draw rectangles directly; we redraw the
     // progress as a 1px-tall coloured "Text" sprite scaled to fill_w via
     // SetImage. Cheap and ugly but works on every Plymouth version.

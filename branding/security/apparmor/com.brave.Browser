@@ -1,0 +1,59 @@
+# AppArmor profile for the Brave browser Flatpak.
+# Brave already runs sandboxed (Chromium's own sandbox plus Flatpak's
+# bubblewrap). This adds a second perimeter so a chained sandbox escape
+# still doesn't get to the user's SSH/PGP keys, password store, or
+# arbitrary $HOME files outside the standard download paths.
+#
+# Mode: complain (warn-only) so first-deploy doesn't break Brave for
+# users with unusual extensions. Switch to enforce in v0.2 once we have
+# audit data.
+
+#include <tunables/global>
+
+profile brave-browser /var/lib/flatpak/app/com.brave.Browser/**/brave flags=(complain,attach_disconnected) {
+    #include <abstractions/base>
+    #include <abstractions/audio>
+    #include <abstractions/dbus-session>
+    #include <abstractions/fonts>
+    #include <abstractions/X>
+    #include <abstractions/wayland>
+    #include <abstractions/nameservice>
+    #include <abstractions/ssl_certs>
+
+    capability sys_admin,
+    capability sys_chroot,
+    capability sys_ptrace,
+    capability dac_read_search,
+
+    network inet stream,
+    network inet6 stream,
+    network inet dgram,
+    network inet6 dgram,
+    network unix,
+
+    /usr/bin/brave{,-browser}                       rmix,
+    /var/lib/flatpak/**                             rmix,
+    /usr/lib{,64}/**                                rm,
+    /opt/**                                         rm,
+    /etc/brave/**                                   r,
+    /etc/brave/policies/**                          r,
+
+    owner @{HOME}/.var/app/com.brave.Browser/**     rwk,
+    owner @{HOME}/Downloads/**                       rw,
+    owner @{HOME}/Pictures/**                        rw,
+    owner @{HOME}/Documents/**                       rw,
+    owner @{HOME}/.cache/com.brave.Browser/**        rwk,
+    owner @{HOME}/.config/com.brave.Browser/**       rwk,
+
+    /tmp/**                                          rw,
+    /run/user/[0-9]*/**                              rwk,
+    /dev/dri/**                                      rw,
+    /dev/snd/**                                      rw,
+    /proc/**                                         r,
+
+    deny owner @{HOME}/.ssh/**                       rwx,
+    deny owner @{HOME}/.gnupg/**                     rwx,
+    deny owner @{HOME}/.config/keepassxc/**          rwx,
+    deny /var/log/**                                 rwx,
+    deny /etc/shadow                                 rwx,
+}

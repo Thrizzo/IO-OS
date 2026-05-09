@@ -19,9 +19,27 @@ suseSetupProduct
 suseInsertService NetworkManager
 suseInsertService sshd
 suseInsertService sddm
+# Security stack — see docs/security.md for the rationale per service.
+suseInsertService firewalld          || true
+suseInsertService apparmor           || true
+suseInsertService systemd-resolved   || true
 
 # Boot into the graphical target — Plasma is the point of this image.
 baseSetRunlevel 5
+
+# --- Flatpak: pre-add Flathub so first-boot installs work offline-first ---
+if command -v flatpak >/dev/null 2>&1; then
+    flatpak remote-add --if-not-exists --system \
+        flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+    # First-boot installs of Brave + Thunderbird happen via a oneshot
+    # systemd unit so we don't burn ISO build time pulling them; see
+    # /etc/systemd/system/io-firstboot-flatpak.service shipped from the
+    # build overlay.
+fi
+
+# --- Resolved + firewall stub-resolv link --------------------------------
+# Kalpa's symlink might already exist; ignore "exists" errors.
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf || true
 
 # --- Live user (deleted by Calamares at install time) --------------------
 echo "io ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/io-live

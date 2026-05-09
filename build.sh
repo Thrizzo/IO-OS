@@ -53,9 +53,11 @@ stage_overlay() {
         ! -name '.gitignore' ! -name 'README.md' \
         -exec rm -rf {} +
 
-    # ---- Branding: color scheme ----
+    # ---- Branding: color schemes (dark + light) ----
     install -Dm644 "$ROOT/branding/colors/IO.colors" \
         "$OVERLAY/usr/share/color-schemes/IO.colors"
+    install -Dm644 "$ROOT/branding/colors/IO-light.colors" \
+        "$OVERLAY/usr/share/color-schemes/IO-light.colors"
 
     # ---- Branding: wallpaper (Plasma-recognised package layout) ----
     install -Dm644 "$ROOT/branding/wallpapers/io-default.svg" \
@@ -119,7 +121,8 @@ EOF
         "$OVERLAY/usr/share/plasma/look-and-feel/org.iolinux.desktop/contents/defaults"
 
     # ---- Plasma config in /etc/skel/.config/ ----
-    for f in plasma-org.kde.plasma.desktop-appletsrc kdeglobals kwinrc dolphinrc; do
+    for f in plasma-org.kde.plasma.desktop-appletsrc kdeglobals kwinrc dolphinrc \
+             kglobalshortcutsrc mimeapps.list; do
         install -Dm644 "$ROOT/plasma-config/$f" "$OVERLAY/etc/skel/.config/$f"
     done
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/dieser-pc.desktop" \
@@ -127,13 +130,106 @@ EOF
     install -Dm644 "$ROOT/plasma-config/skel/Desktop/papierkorb.desktop" \
         "$OVERLAY/etc/skel/Desktop/papierkorb.desktop"
 
-    # ---- io-welcome (QML + launcher + autostart) ----
+    # ---- KWin scripts (Aero Shake et al.) ----
+    if [ -d "$ROOT/plasma-config/kwin-scripts" ]; then
+        for script in "$ROOT/plasma-config/kwin-scripts"/*/; do
+            [ -d "$script" ] || continue
+            local id
+            id=$(basename "$script")
+            install -Dm644 "$script/metadata.json" \
+                "$OVERLAY/usr/share/kwin/scripts/$id/metadata.json"
+            if [ -f "$script/contents/code/main.js" ]; then
+                install -Dm644 "$script/contents/code/main.js" \
+                    "$OVERLAY/usr/share/kwin/scripts/$id/contents/code/main.js"
+            fi
+        done
+    fi
+
+    # ---- Brave managed policy + autostart for io-firstboot Flatpak ----
+    install -Dm644 "$ROOT/branding/brave-policies/io-defaults.json" \
+        "$OVERLAY/etc/brave/policies/managed/io-defaults.json"
+    install -Dm644 "$ROOT/branding/firstboot/io-firstboot-flatpak.service" \
+        "$OVERLAY/etc/systemd/system/io-firstboot-flatpak.service"
+    install -dm755 "$OVERLAY/etc/systemd/system/multi-user.target.wants"
+    ln -sf ../io-firstboot-flatpak.service \
+        "$OVERLAY/etc/systemd/system/multi-user.target.wants/io-firstboot-flatpak.service"
+
+    # ---- Security drop-ins (DoT, firewalld, AppArmor, Wine FD limits) ----
+    install -Dm644 "$ROOT/branding/security/resolved/io-doh.conf" \
+        "$OVERLAY/etc/systemd/resolved.conf.d/io-doh.conf"
+    install -Dm644 "$ROOT/branding/security/firewalld/io-public.xml" \
+        "$OVERLAY/etc/firewalld/zones/public.xml"
+    install -Dm644 "$ROOT/branding/security/limits.d/99-io-wine.conf" \
+        "$OVERLAY/etc/security/limits.d/99-io-wine.conf"
+    install -Dm644 "$ROOT/branding/security/modules-load.d/io-ntsync.conf" \
+        "$OVERLAY/etc/modules-load.d/io-ntsync.conf"
+    for prof in "$ROOT/branding/security/apparmor"/*; do
+        [ -f "$prof" ] || continue
+        install -Dm644 "$prof" \
+            "$OVERLAY/etc/apparmor.d/$(basename "$prof")"
+    done
+
+    # ---- io-run dispatcher (Windows binary launcher) ----
+    install -Dm755 "$ROOT/packages/io-run/io-run" \
+        "$OVERLAY/usr/bin/io-run"
+    install -Dm755 "$ROOT/packages/io-run/io-run-prepare-templates" \
+        "$OVERLAY/usr/bin/io-run-prepare-templates"
+    install -Dm644 "$ROOT/packages/io-run/io-run.desktop" \
+        "$OVERLAY/usr/share/applications/io-run.desktop"
+    install -Dm644 "$ROOT/packages/io-run/io-run-prepare-templates.service" \
+        "$OVERLAY/usr/lib/systemd/user/io-run-prepare-templates.service"
+    install -dm755 "$OVERLAY/etc/skel/.config/systemd/user/default.target.wants"
+    ln -sf ../../../../../usr/lib/systemd/user/io-run-prepare-templates.service \
+        "$OVERLAY/etc/skel/.config/systemd/user/default.target.wants/io-run-prepare-templates.service"
+    if [ -d "$ROOT/packages/io-run/recipes" ]; then
+        for r in "$ROOT/packages/io-run/recipes"/*.yaml; do
+            [ -f "$r" ] || continue
+            install -Dm644 "$r" \
+                "$OVERLAY/usr/share/io-run/recipes/$(basename "$r")"
+        done
+    fi
+
+    # ---- io-welcome (QML + strings + optional .qm + launcher + autostart) ----
     install -Dm644 "$ROOT/packages/io-welcome/qml/Main.qml" \
         "$OVERLAY/usr/share/io-welcome/Main.qml"
+    install -Dm644 "$ROOT/packages/io-welcome/qml/strings.js" \
+        "$OVERLAY/usr/share/io-welcome/strings.js"
+    # Optional: compiled translations. lrelease is invoked above only when
+    # the toolchain is present; if no .qm exists we still have strings.js
+    # as the fallback path so the welcome wizard always renders.
+    if [ -d "$ROOT/packages/io-welcome/i18n" ]; then
+        for qm in "$ROOT/packages/io-welcome/i18n"/*.qm; do
+            [ -f "$qm" ] || continue
+            install -Dm644 "$qm" \
+                "$OVERLAY/usr/share/io-welcome/i18n/$(basename "$qm")"
+        done
+    fi
     install -Dm755 "$ROOT/packages/io-welcome/io-welcome-launcher" \
         "$OVERLAY/usr/bin/io-welcome-launcher"
     install -Dm644 "$ROOT/packages/io-welcome/io-welcome.desktop" \
         "$OVERLAY/etc/xdg/autostart/io-welcome.desktop"
+}
+
+# --- step 1.5: optional Qt Linguist compile ------------------------------
+# If lrelease is on PATH, compile any io-welcome .ts files into .qm so the
+# wizard can use the QTranslator path; otherwise the JS strings module
+# (strings.js) is the fallback and nothing is missing.
+compile_translations() {
+    local ts_dir="$ROOT/packages/io-welcome/i18n"
+    [ -d "$ts_dir" ] || return 0
+    if command -v lrelease-qt6 >/dev/null 2>&1; then
+        local LRELEASE=lrelease-qt6
+    elif command -v lrelease >/dev/null 2>&1; then
+        local LRELEASE=lrelease
+    else
+        echo "==> Skipping translation compile (no lrelease on PATH)"
+        return 0
+    fi
+    echo "==> Compiling io-welcome translations"
+    for ts in "$ts_dir"/*.ts; do
+        [ -f "$ts" ] || continue
+        "$LRELEASE" "$ts" -qm "${ts%.ts}.qm" >/dev/null
+    done
 }
 
 # --- step 3: build --------------------------------------------------------
@@ -141,6 +237,7 @@ SUDO=""
 [ "$EUID" -ne 0 ] && SUDO="sudo"
 
 generate_pngs
+compile_translations
 stage_overlay
 
 echo "==> Building IO Linux ISO"
@@ -148,13 +245,24 @@ echo "    description: $DESC"
 echo "    output:      $OUT"
 echo
 
-$SUDO kiwi-ng --type iso system build \
+# kiwi-ng spawns zypper, which already parallelises; --logfile keeps the
+# verbose build trace next to the ISO so post-mortems don't need scrollback.
+$SUDO kiwi-ng --type iso --logfile "$OUT/kiwi-build.log" system build \
     --description "$DESC" \
     --target-dir "$OUT"
 
 echo
 echo "==> Build complete. Artefacts:"
-ls -lh "$OUT"/*.iso 2>/dev/null || {
-    echo "    no .iso produced — check kiwi log above"
+if ls "$OUT"/*.iso >/dev/null 2>&1; then
+    ls -lh "$OUT"/*.iso
+
+    # Emit deterministic checksums for downstream verification (mirrors,
+    # release pages). Overwrites on re-build so SHA256SUMS is always current.
+    ( cd "$OUT" && sha256sum -- *.iso > SHA256SUMS )
+    echo
+    echo "==> SHA256SUMS:"
+    cat "$OUT/SHA256SUMS"
+else
+    echo "    no .iso produced — see $OUT/kiwi-build.log"
     exit 1
-}
+fi

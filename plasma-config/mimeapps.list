@@ -1,0 +1,38 @@
+# Default MIME handlers shipped to /etc/skel/.config/.
+# Forks: edit this file to change which app handles which scheme/type.
+# IO ships Brave as the web browser (privacy-respecting Chromium fork,
+# tracker blocking + ad blocking on by default — closer to the Windows
+# parity expectation than Firefox's out-of-box behaviour).
+
+[Default Applications]
+# Web — http(s) and the bare html mimetype.
+text/html=com.brave.Browser.desktop
+x-scheme-handler/http=com.brave.Browser.desktop
+x-scheme-handler/https=com.brave.Browser.desktop
+x-scheme-handler/about=com.brave.Browser.desktop
+x-scheme-handler/unknown=com.brave.Browser.desktop
+
+# Mail — Thunderbird; matches the taskbar pin.
+x-scheme-handler/mailto=org.mozilla.Thunderbird.desktop
+message/rfc822=org.mozilla.Thunderbird.desktop
+
+# File manager — Dolphin (Win+E binding lives in kglobalshortcutsrc).
+inode/directory=org.kde.dolphin.desktop
+
+# Terminal — Konsole (Ctrl+Alt+T).
+x-scheme-handler/konsole=org.kde.konsole.desktop
+
+# Windows binaries — IO Run dispatcher (see packages/io-run/).
+# These types cover .exe, .msi, .bat, and Wine-style .lnk shortcuts.
+application/x-msdownload=io-run.desktop
+application/x-msi=io-run.desktop
+application/x-ms-dos-executable=io-run.desktop
+application/x-ms-shortcut=io-run.desktop
+application/vnd.microsoft.portable-executable=io-run.desktop
+
+[Added Associations]
+# Allow users to switch by listing alternatives — Plasma's "Open with"
+# menu uses this section. Brave first, Firefox kept as a known fallback.
+text/html=com.brave.Browser.desktop;org.mozilla.firefox.desktop;
+x-scheme-handler/http=com.brave.Browser.desktop;org.mozilla.firefox.desktop;
+x-scheme-handler/https=com.brave.Browser.desktop;org.mozilla.firefox.desktop;

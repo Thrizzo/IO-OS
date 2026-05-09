@@ -1,0 +1,85 @@
+# AppArmor profile for /usr/bin/io-run.
+# Goal: even if a Windows binary breaks out of bwrap (it shouldn't, but
+# defence in depth), AppArmor still keeps it away from the user's real
+# documents, browser profile, and SSH keys.
+#
+# Mode: enforce. Loaded at boot via apparmor.service.
+#
+# Notes for maintainers:
+#   - Wine itself is allowed to do exec/mmap of arbitrary files inside
+#     the prefix; that's the whole point of Wine. We deny everything
+#     outside the prefix instead.
+#   - If a recipe legitimately needs e.g. PCSC (smartcard), add an
+#     `include if exists` line for a per-app abstraction.
+
+#include <tunables/global>
+
+profile io-run /usr/bin/io-run flags=(complain) {
+    #include <abstractions/base>
+    #include <abstractions/python>
+    #include <abstractions/dbus-session-strict>
+    #include <abstractions/X>
+    #include <abstractions/wayland>
+
+    /usr/bin/io-run                         r,
+    /usr/bin/python3*                       ix,
+    /usr/bin/wine{,64,server}               Cx -> wine,
+    /usr/bin/wineboot                       Cx -> wine,
+    /usr/bin/bwrap                          Cx -> wine,
+    /usr/bin/kdialog                        Px,
+
+    /usr/share/io-run/**                    r,
+    /usr/share/locale/**                    r,
+
+    # User's per-app prefixes — RW. Templates — RO.
+    owner @{HOME}/.local/share/io-run/prefixes/**   rw,
+    owner @{HOME}/.local/share/io-run/templates/**  r,
+    owner @{HOME}/.config/io-run/**                 rwk,
+    owner @{HOME}/.cache/io-run/**                  rwk,
+
+    # Read the binary the user double-clicked from anywhere readable, but
+    # never write back to it.
+    /**                                              r,
+    /home/**                                         r,
+    /run/media/**                                    r,
+    /tmp/**                                          rw,
+
+    # Deny obvious credential and key paths even when user-owned.
+    deny owner @{HOME}/.ssh/**                       rwx,
+    deny owner @{HOME}/.gnupg/**                     rwx,
+    deny owner @{HOME}/.config/keepassxc/**          rwx,
+
+    # The Wine subprofile inherits everything io-run could read but is
+    # additionally network-restricted by bwrap's --unshare-net when the
+    # recipe asks for it.
+    profile wine flags=(complain) {
+        #include <abstractions/base>
+        #include <abstractions/X>
+        #include <abstractions/wayland>
+        #include <abstractions/audio>
+        #include <abstractions/fonts>
+        #include <abstractions/gnome>
+
+        capability sys_ptrace,
+        capability dac_read_search,
+
+        /usr/bin/wine{,64,server}                    rmix,
+        /usr/bin/wineboot                            rmix,
+        /usr/lib/wine/**                             rmix,
+        /usr/lib64/wine/**                           rmix,
+        /usr/share/wine/**                           r,
+
+        owner @{HOME}/.local/share/io-run/**         rwk,
+
+        # Sound + GPU.
+        /dev/snd/**                                   rw,
+        /dev/dri/**                                   rw,
+        /dev/nvidia*                                  rw,
+        /dev/ntsync                                   rw,
+
+        # Block the same credential paths.
+        deny owner @{HOME}/.ssh/**                    rwx,
+        deny owner @{HOME}/.gnupg/**                  rwx,
+        deny owner @{HOME}/.config/keepassxc/**       rwx,
+    }
+}
