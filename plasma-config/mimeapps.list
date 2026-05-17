@@ -12,9 +12,11 @@ x-scheme-handler/https=com.brave.Browser.desktop
 x-scheme-handler/about=com.brave.Browser.desktop
 x-scheme-handler/unknown=com.brave.Browser.desktop
 
-# Mail — Thunderbird; matches the taskbar pin.
-x-scheme-handler/mailto=org.mozilla.Thunderbird.desktop
-message/rfc822=org.mozilla.Thunderbird.desktop
+# Mail — Proton Mail desktop (Flathub: me.proton.Mail). Replaces
+# Thunderbird as the default productivity-suite mail client. The PGP
+# story is integrated end-to-end with Proton's encrypted backend.
+x-scheme-handler/mailto=me.proton.Mail.desktop
+message/rfc822=me.proton.Mail.desktop
 
 # File manager — Dolphin (Win+E binding lives in kglobalshortcutsrc).
 inode/directory=org.kde.dolphin.desktop
@@ -36,3 +38,7 @@ application/vnd.microsoft.portable-executable=io-run.desktop
 text/html=com.brave.Browser.desktop;org.mozilla.firefox.desktop;
 x-scheme-handler/http=com.brave.Browser.desktop;org.mozilla.firefox.desktop;
 x-scheme-handler/https=com.brave.Browser.desktop;org.mozilla.firefox.desktop;
+# Mail — Proton Mail primary, Thunderbird kept as a known fallback so
+# users who want IMAP/SMTP via Proton Bridge can still do so.
+x-scheme-handler/mailto=me.proton.Mail.desktop;org.mozilla.Thunderbird.desktop;
+message/rfc822=me.proton.Mail.desktop;org.mozilla.Thunderbird.desktop;

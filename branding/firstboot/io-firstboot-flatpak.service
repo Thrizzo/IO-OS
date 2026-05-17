@@ -2,14 +2,23 @@
 # first boot. Runs once after network-online; disables itself when the
 # install completes so subsequent boots are no-ops.
 #
-# Why on first boot rather than baked into the ISO: Flathub flatpaks are
-# big (Brave + Thunderbird ~ 700 MB combined). Putting them in the ISO
-# would push the image past the size budget for a USB-stick install.
-# The trade-off is a one-time online install; offline installs can drop
-# a /etc/flatpak/installations.d/ stub that points at a local mirror.
+# Why on first boot rather than baked into the ISO: the Proton suite +
+# Brave is ~1.2 GB combined. Putting them in the ISO would push the
+# image past the size budget for a USB-stick install. The trade-off is
+# a one-time online install; offline installs can drop a
+# /etc/flatpak/installations.d/ stub that points at a local mirror.
+#
+# IO ships the Proton suite as the productivity default:
+#   - Brave            : web browser
+#   - Proton Mail      : encrypted mail client (replaces Thunderbird)
+#   - Proton Pass      : password manager
+#   - Proton VPN       : VPN client (replaces a Mullvad recommendation)
+# Proton Calendar and Proton Drive don't have native Linux apps as of
+# v0.1; they are shipped as Brave PWAs via the io-proton-* .desktop
+# entries dropped by the build overlay (see build.sh).
 
 [Unit]
-Description=Install IO default Flatpaks (Brave, Thunderbird)
+Description=Install IO default Flatpaks (Brave + Proton suite)
 ConditionPathExists=!/var/lib/io-firstboot-flatpak.done
 After=network-online.target NetworkManager-wait-online.service
 Wants=network-online.target
@@ -18,9 +27,15 @@ Wants=network-online.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStartPre=/bin/sh -c 'flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo'
-ExecStart=/bin/sh -c 'flatpak install -y --noninteractive --system flathub com.brave.Browser org.mozilla.Thunderbird || exit 1'
+# Best-effort install per app so a single unavailable ref doesn't block
+# the rest. `|| true` per line is intentional: the firstboot OOBE shows
+# a warning if any defaults are missing, but the system is still usable.
+ExecStart=/bin/sh -c 'flatpak install -y --noninteractive --system flathub com.brave.Browser || true'
+ExecStart=/bin/sh -c 'flatpak install -y --noninteractive --system flathub me.proton.Mail || true'
+ExecStart=/bin/sh -c 'flatpak install -y --noninteractive --system flathub me.proton.Pass || true'
+ExecStart=/bin/sh -c 'flatpak install -y --noninteractive --system flathub com.protonvpn.www || true'
 ExecStartPost=/bin/touch /var/lib/io-firstboot-flatpak.done
-TimeoutStartSec=600
+TimeoutStartSec=900
 Nice=10
 IOSchedulingClass=idle
 

@@ -409,11 +409,21 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignHCenter
                     columns: 2
                     columnSpacing: 24
-                    rowSpacing: 12
+                    rowSpacing: 10
                     Text { text: tr("appsBrowserLabel"); color: window.fg() }
                     Text { text: Strings.defaultApps.browser; color: window.fg() }
                     Text { text: tr("appsMailLabel"); color: window.fg() }
                     Text { text: Strings.defaultApps.mail; color: window.fg() }
+                    Text { text: tr("appsPasswordsLabel"); color: window.fg() }
+                    Text { text: Strings.defaultApps.passwords; color: window.fg() }
+                    Text { text: tr("appsVpnLabel"); color: window.fg() }
+                    Text { text: Strings.defaultApps.vpn; color: window.fg() }
+                    Text { text: tr("appsCalendarLabel"); color: window.fg() }
+                    Text { text: Strings.defaultApps.calendar; color: window.fg() }
+                    Text { text: tr("appsDriveLabel"); color: window.fg() }
+                    Text { text: Strings.defaultApps.drive; color: window.fg() }
+                    Text { text: tr("appsOfficeLabel"); color: window.fg() }
+                    Text { text: Strings.defaultApps.office; color: window.fg() }
                     Text { text: tr("appsFilesLabel"); color: window.fg() }
                     Text { text: Strings.defaultApps.files; color: window.fg() }
                     Text { text: tr("appsTerminalLabel"); color: window.fg() }

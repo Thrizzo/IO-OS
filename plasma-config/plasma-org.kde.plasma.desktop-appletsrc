@@ -53,7 +53,10 @@ immutability=1
 plugin=org.kde.plasma.icontasks
 
 [Containments][1][Applets][4][Configuration][General]
-launchers=applications:com.brave.Browser.desktop,applications:org.kde.dolphin.desktop,applications:org.mozilla.Thunderbird.desktop,applications:writer.desktop,applications:org.kde.konsole.desktop,applications:systemsettings.desktop
+# Pinned-app order mirrors the Proton productivity suite as the default:
+# browser, files, mail, password manager, VPN, calendar (web app),
+# office, terminal, settings. Forks swap apps by editing this line.
+launchers=applications:com.brave.Browser.desktop,applications:org.kde.dolphin.desktop,applications:me.proton.Mail.desktop,applications:me.proton.Pass.desktop,applications:com.protonvpn.www.desktop,applications:io-proton-calendar.desktop,applications:writer.desktop,applications:org.kde.konsole.desktop,applications:systemsettings.desktop
 showOnlyCurrentDesktop=false
 showOnlyCurrentActivity=true
 showOnlyCurrentScreen=false

@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Proton Calendar
+Name[de]=Proton Kalender
+GenericName=Encrypted calendar
+GenericName[de]=Verschlüsselter Kalender
+Comment=End-to-end encrypted calendar by Proton
+Comment[de]=Ende-zu-Ende verschlüsselter Kalender von Proton
+# Proton Calendar has no native Linux app as of v0.1, so we ship a
+# Brave-launched PWA. --app strips the URL bar / tab strip; --class
+# gives the window its own taskbar group + StartupWMClass below ties
+# the .desktop file to it so the pinned launcher highlights correctly.
+Exec=flatpak run --branch=stable --command=brave com.brave.Browser --app=https://calendar.proton.me --class=io-proton-calendar %U
+Icon=x-office-calendar
+Categories=Office;Calendar;Network;
+StartupNotify=true
+StartupWMClass=io-proton-calendar
+Keywords=calendar;proton;encrypted;
+NoDisplay=false

@@ -49,9 +49,17 @@ var strings = {
         // Default-app page
         appsHeading: "Standardprogramme",
         appsBody:
-            "Diese Programme öffnen Dateien und Links, bis du es änderst:",
+            "IO Linux setzt auf die Proton-Suite (Schweizer Anbieter, " +
+            "Ende-zu-Ende-Verschlüsselung, kein Tracking) für Mail, " +
+            "Passwörter, VPN, Kalender und Cloud-Speicher. " +
+            "Alle Programme lassen sich später ändern.",
         appsBrowserLabel: "Browser",
         appsMailLabel: "E-Mail",
+        appsPasswordsLabel: "Passwörter",
+        appsVpnLabel: "VPN",
+        appsCalendarLabel: "Kalender",
+        appsDriveLabel: "Cloud-Speicher",
+        appsOfficeLabel: "Office",
         appsFilesLabel: "Dateien",
         appsTerminalLabel: "Terminal",
 
@@ -107,9 +115,17 @@ var strings = {
         privacyCrashReports: "Send crash reports (not implemented)",
 
         appsHeading: "Default applications",
-        appsBody: "These apps open files and links until you change them:",
+        appsBody:
+            "IO Linux uses the Proton suite (Swiss provider, end-to-end " +
+            "encryption, no tracking) for mail, passwords, VPN, calendar " +
+            "and cloud storage. Everything can be changed later.",
         appsBrowserLabel: "Browser",
         appsMailLabel: "Mail",
+        appsPasswordsLabel: "Passwords",
+        appsVpnLabel: "VPN",
+        appsCalendarLabel: "Calendar",
+        appsDriveLabel: "Cloud storage",
+        appsOfficeLabel: "Office",
         appsFilesLabel: "Files",
         appsTerminalLabel: "Terminal",
 
@@ -142,10 +158,15 @@ function tr(locale, key) {
 // Suggested defaults for the apps page. Kept here (not in QML) so a fork
 // can change the picks without touching code.
 var defaultApps = {
-    browser:  "Brave",
-    mail:     "Thunderbird",
-    files:    "Dolphin",
-    terminal: "Konsole"
+    browser:   "Brave",
+    mail:      "Proton Mail",
+    passwords: "Proton Pass",
+    vpn:       "Proton VPN",
+    calendar:  "Proton Calendar",
+    drive:     "Proton Drive",
+    office:    "LibreOffice",
+    files:     "Dolphin",
+    terminal:  "Konsole"
 };
 
 // External links for the docs row on the welcome page.

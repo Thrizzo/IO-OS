@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Proton Drive
+Name[de]=Proton Drive
+GenericName=Encrypted cloud storage
+GenericName[de]=Verschlüsselter Cloud-Speicher
+Comment=End-to-end encrypted cloud storage by Proton
+Comment[de]=Ende-zu-Ende verschlüsselter Cloud-Speicher von Proton
+# Proton Drive's native Linux client is CLI-only as of v0.1; the GUI
+# lives at drive.proton.me. We ship it as a Brave PWA for parity with
+# Calendar; the day Proton ships a real desktop client, this .desktop
+# file gets replaced and the taskbar pin transparently updates.
+Exec=flatpak run --branch=stable --command=brave com.brave.Browser --app=https://drive.proton.me --class=io-proton-drive %U
+Icon=folder-cloud
+Categories=Office;Network;FileTools;
+StartupNotify=true
+StartupWMClass=io-proton-drive
+Keywords=drive;cloud;storage;proton;encrypted;
+NoDisplay=false

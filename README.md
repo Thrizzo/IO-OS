@@ -23,7 +23,8 @@ sovereignty without sacrificing usability.
 
 - **Base:** openSUSE Kalpa (immutable, transactional updates)
 - **Desktop:** KDE Plasma 6, configured to feel familiar to Windows users
-- **Apps:** Flatpaks from Flathub (Brave, Thunderbird, LibreOffice, …)
+- **Apps:** Flatpaks from Flathub (Brave, Proton suite, LibreOffice, …)
+- **Productivity suite:** Proton (Mail, Pass, VPN, Calendar, Drive — Swiss, E2E-encrypted, no telemetry)
 - **Windows binaries:** sandboxed via `io-run` (Wine + bwrap, per-app prefix)
 - **Security:** AppArmor + firewalld (deny-incoming) + DoT/DNSSEC by default
 - **Languages:** German (default) and English, both first-class
@@ -111,7 +112,8 @@ Bedienbarkeit.
 
 - **Basis:** openSUSE Kalpa (unveränderlich, transaktionale Updates)
 - **Desktop:** KDE Plasma 6, für Windows-Anwender:innen angepasst
-- **Anwendungen:** Flatpaks aus Flathub (Brave, Thunderbird, LibreOffice, …)
+- **Anwendungen:** Flatpaks aus Flathub (Brave, Proton-Suite, LibreOffice, …)
+- **Produktivität:** Proton (Mail, Pass, VPN, Kalender, Drive — Schweiz, Ende-zu-Ende verschlüsselt, kein Tracking)
 - **Windows-Programme:** über `io-run` sandboxed (Wine + bwrap)
 - **Sicherheit:** AppArmor + firewalld + DoT/DNSSEC standardmäßig
 - **Sprachen:** Deutsch (Standard) und Englisch, gleichrangig

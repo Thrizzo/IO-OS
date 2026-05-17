@@ -154,6 +154,17 @@ EOF
     ln -sf ../io-firstboot-flatpak.service \
         "$OVERLAY/etc/systemd/system/multi-user.target.wants/io-firstboot-flatpak.service"
 
+    # ---- Proton suite: PWA launchers for Calendar + Drive (web-only) ----
+    # Real native Proton apps (Mail, Pass, VPN) come from Flathub via the
+    # firstboot unit; Calendar + Drive have no native Linux client yet,
+    # so we ship Brave-launched PWA .desktop entries pinned to the
+    # taskbar. Replace once Proton ships native binaries.
+    for d in "$ROOT/branding/proton"/*.desktop; do
+        [ -f "$d" ] || continue
+        install -Dm644 "$d" \
+            "$OVERLAY/usr/share/applications/$(basename "$d")"
+    done
+
     # ---- Security drop-ins (DoT, firewalld, AppArmor, Wine FD limits) ----
     install -Dm644 "$ROOT/branding/security/resolved/io-doh.conf" \
         "$OVERLAY/etc/systemd/resolved.conf.d/io-doh.conf"

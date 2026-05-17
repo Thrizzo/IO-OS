@@ -25,17 +25,54 @@ We do **not** try to defend against:
 
 ## What we ship in v0.1
 
-| Layer            | Default                                           | Where                                                  |
-|------------------|---------------------------------------------------|--------------------------------------------------------|
-| Network DNS      | DoT to Quad9, fallback Cloudflare, DNSSEC on      | `/etc/systemd/resolved.conf.d/io-doh.conf`             |
-| Firewall         | firewalld `public` zone, target=DROP, no inbound  | `/etc/firewalld/zones/public.xml`                      |
-| App sandboxing   | Flatpak (Chromium sandbox + bubblewrap)           | every preinstalled GUI app is a Flatpak                |
-| Windows binaries | per-app Wine prefix in bwrap, `--unshare-net` opt | `packages/io-run/`                                     |
-| MAC              | AppArmor profiles (complain mode)                 | `branding/security/apparmor/`                          |
-| Updates          | openSUSE Kalpa transactional, btrfs snapshots     | `kiwi/config.xml` base                                 |
-| Telemetry        | none — IO collects nothing                        | architectural; verifiable                              |
-| Browser          | Brave with managed policy: P3A off, no Sync nag   | `branding/brave-policies/io-defaults.json`             |
-| Display server   | Wayland-only Plasma session                       | `kiwi/config.xml` (no `xorg-x11-server-session`)       |
+| Layer             | Default                                           | Where                                                  |
+|-------------------|---------------------------------------------------|--------------------------------------------------------|
+| Network DNS       | DoT to Quad9, fallback Cloudflare, DNSSEC on      | `/etc/systemd/resolved.conf.d/io-doh.conf`             |
+| Firewall          | firewalld `public` zone, target=DROP, no inbound  | `/etc/firewalld/zones/public.xml`                      |
+| App sandboxing    | Flatpak (Chromium sandbox + bubblewrap)           | every preinstalled GUI app is a Flatpak                |
+| Windows binaries  | per-app Wine prefix in bwrap, `--unshare-net` opt | `packages/io-run/`                                     |
+| MAC               | AppArmor profiles (complain mode)                 | `branding/security/apparmor/`                          |
+| Updates           | openSUSE Kalpa transactional, btrfs snapshots     | `kiwi/config.xml` base                                 |
+| Telemetry         | none — IO collects nothing                        | architectural; verifiable                              |
+| Browser           | Brave with managed policy: P3A off, no Sync nag   | `branding/brave-policies/io-defaults.json`             |
+| Productivity suite| Proton (Mail, Pass, VPN, Calendar, Drive)         | `branding/firstboot/io-firstboot-flatpak.service`      |
+| Display server    | Wayland-only Plasma session                       | `kiwi/config.xml` (no `xorg-x11-server-session`)       |
+
+## Productivity suite — Proton
+
+IO ships the Proton suite as the default productivity stack. Rationale:
+
+- **Swiss jurisdiction.** Proton is headquartered in Switzerland and
+  governed by Swiss data-protection law, which is structurally outside
+  the US CLOUD Act and the UK Investigatory Powers Act.
+- **End-to-end encryption** for mail, calendar, drive, password vault.
+  We do not have to trust the provider — the math does the work.
+- **Open-source clients.** Every Proton Linux client is GPL/MIT, so
+  we can audit and ship them via Flathub without supply-chain hand-waving.
+- **No US-style ad business model.** Proton's revenue is subscriptions;
+  the business does not benefit from logging or selling user behaviour.
+
+| Component         | App                  | Delivery                                |
+|-------------------|----------------------|-----------------------------------------|
+| Mail              | Proton Mail desktop  | Flathub `me.proton.Mail`                |
+| Password manager  | Proton Pass desktop  | Flathub `me.proton.Pass`                |
+| VPN               | Proton VPN GUI       | Flathub `com.protonvpn.www`             |
+| Calendar          | Proton Calendar      | Brave PWA `io-proton-calendar.desktop`  |
+| Cloud storage     | Proton Drive         | Brave PWA `io-proton-drive.desktop`     |
+
+Calendar and Drive don't have native Linux apps yet; we ship Brave
+`--app=` web shortcuts and replace them with native binaries the day
+Proton ships them. The PWAs honour the Brave AppArmor profile so the
+sandbox story stays consistent.
+
+**Free tier is enough.** IO never gates anything behind a Proton
+subscription. Users without an account see the sign-in screen on first
+launch and can ignore it; the OS works without Proton.
+
+**Swapping out Proton.** A fork that prefers Tutanota / Posteo /
+Nextcloud edits the firstboot service, mimeapps.list, the taskbar pin
+list, and `packages/io-welcome/qml/strings.js`. See
+`docs/customization.md` section 5.
 
 ## DNS — DoT + DNSSEC
 
