@@ -1,0 +1,28 @@
+{
+    "_comment": [
+        "Pre-approved outbound for the apps we ship by default. Saves the",
+        "user from dismissing 10 prompts the first time they open Brave or",
+        "Proton Mail. Users can still revoke individually in the OpenSnitch",
+        "UI; removing this file restores deny-by-default."
+    ],
+
+    "Created": "2026-05-17T00:00:00Z",
+    "Updated": "2026-05-17T00:00:00Z",
+    "Name": "010-allow-default-apps",
+    "Enabled": true,
+    "Precedence": false,
+    "Action": "allow",
+    "Duration": "always",
+    "Operator": {
+        "Type": "list",
+        "Operand": "list",
+        "Sensitive": false,
+        "List": [
+            { "Type": "regexp", "Operand": "process.path", "Sensitive": false, "Data": "^/var/lib/flatpak/app/com\\.brave\\.Browser/.*" },
+            { "Type": "regexp", "Operand": "process.path", "Sensitive": false, "Data": "^/var/lib/flatpak/app/me\\.proton\\.Mail/.*" },
+            { "Type": "regexp", "Operand": "process.path", "Sensitive": false, "Data": "^/var/lib/flatpak/app/me\\.proton\\.Pass/.*" },
+            { "Type": "regexp", "Operand": "process.path", "Sensitive": false, "Data": "^/var/lib/flatpak/app/com\\.protonvpn\\.www/.*" },
+            { "Type": "regexp", "Operand": "process.path", "Sensitive": false, "Data": "^/var/lib/flatpak/app/org\\.mozilla\\.Thunderbird/.*" }
+        ]
+    }
+}

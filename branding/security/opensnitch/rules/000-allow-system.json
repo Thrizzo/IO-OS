@@ -1,0 +1,31 @@
+{
+    "_comment": [
+        "Baseline allow-rules so the system itself can talk on first boot",
+        "without 30 popup prompts during the firstboot Flatpak install.",
+        "Lowest numeric prefix wins; user-added rules at 500+ override.",
+        "Each entry is one allow-list entry; everything else hits the",
+        "interactive prompt and the user decides."
+    ],
+
+    "Created": "2026-05-17T00:00:00Z",
+    "Updated": "2026-05-17T00:00:00Z",
+    "Name": "000-allow-system",
+    "Enabled": true,
+    "Precedence": false,
+    "Action": "allow",
+    "Duration": "always",
+    "Operator": {
+        "Type": "list",
+        "Operand": "list",
+        "Sensitive": false,
+        "List": [
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/lib/systemd/systemd-resolved" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/lib/systemd/systemd-timesyncd" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/sbin/NetworkManager" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/bin/flatpak" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/bin/flatpak-system-helper" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/bin/zypper" },
+            { "Type": "simple", "Operand": "process.path", "Sensitive": false, "Data": "/usr/sbin/transactional-update" }
+        ]
+    }
+}

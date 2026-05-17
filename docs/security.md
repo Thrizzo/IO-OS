@@ -25,18 +25,20 @@ We do **not** try to defend against:
 
 ## What we ship in v0.1
 
-| Layer             | Default                                           | Where                                                  |
-|-------------------|---------------------------------------------------|--------------------------------------------------------|
-| Network DNS       | DoT to Quad9, fallback Cloudflare, DNSSEC on      | `/etc/systemd/resolved.conf.d/io-doh.conf`             |
-| Firewall          | firewalld `public` zone, target=DROP, no inbound  | `/etc/firewalld/zones/public.xml`                      |
-| App sandboxing    | Flatpak (Chromium sandbox + bubblewrap)           | every preinstalled GUI app is a Flatpak                |
-| Windows binaries  | per-app Wine prefix in bwrap, `--unshare-net` opt | `packages/io-run/`                                     |
-| MAC               | AppArmor profiles (complain mode)                 | `branding/security/apparmor/`                          |
-| Updates           | openSUSE Kalpa transactional, btrfs snapshots     | `kiwi/config.xml` base                                 |
-| Telemetry         | none — IO collects nothing                        | architectural; verifiable                              |
-| Browser           | Brave with managed policy: P3A off, no Sync nag   | `branding/brave-policies/io-defaults.json`             |
-| Productivity suite| Proton (Mail, Pass, VPN, Calendar, Drive)         | `branding/firstboot/io-firstboot-flatpak.service`      |
-| Display server    | Wayland-only Plasma session                       | `kiwi/config.xml` (no `xorg-x11-server-session`)       |
+| Layer              | Default                                           | Where                                                  |
+|--------------------|---------------------------------------------------|--------------------------------------------------------|
+| Network DNS        | DoT to Quad9, fallback Cloudflare, DNSSEC on      | `/etc/systemd/resolved.conf.d/io-doh.conf`             |
+| Firewall (inbound) | firewalld `public` zone, target=DROP, no inbound  | `/etc/firewalld/zones/public.xml`                      |
+| Firewall (outbound)| OpenSnitch deny-by-default + interactive prompt   | `/etc/opensnitchd/`                                    |
+| App sandboxing     | Flatpak (Chromium sandbox + bubblewrap)           | every preinstalled GUI app is a Flatpak                |
+| Windows binaries   | per-app Wine prefix in bwrap, `--unshare-net` opt | `packages/io-run/`                                     |
+| MAC                | AppArmor profiles (complain mode by default)      | `branding/security/apparmor/`                          |
+| Disk encryption    | LUKS2 forced by Calamares; TPM2-bound on PCR 0+7+14 | `branding/calamares/modules/`                        |
+| Updates            | openSUSE Kalpa transactional, btrfs snapshots     | `kiwi/config.xml` base                                 |
+| Telemetry          | none — IO collects nothing                        | architectural; verifiable                              |
+| Browser            | Brave with managed policy: P3A off, no Sync nag   | `branding/brave-policies/io-defaults.json`             |
+| Productivity suite | Proton (Mail, Pass, VPN, Calendar, Drive)         | `branding/firstboot/io-firstboot-flatpak.service`      |
+| Display server     | Wayland-only Plasma session                       | `kiwi/config.xml` (no `xorg-x11-server-session`)       |
 
 ## Productivity suite — Proton
 
@@ -106,15 +108,61 @@ calls `connect()`, the kernel returns `ENETUNREACH`.
 
 ## AppArmor
 
-Profiles ship in `complain` mode for v0.1. That means they log a
-violation to journal but do not block the action. We use the first
-release as audit data and switch to `enforce` in v0.2 once we have a
-real signal of false-positive rate.
+Profiles ship in `complain` mode by default for v0.1: they log
+violations to journal but don't block the action. Builds run with
+`IO_APPARMOR_ENFORCE=1 ./build.sh` flip every profile to enforce mode
+at install time (the build sed-edits `flags=(complain)` to `flags=()`
+in each profile during the overlay step). KRITIS deployments should
+flip the switch; everyone else gets a fortnight of audit data first.
 
 In-tree profiles:
 
 - `usr.bin.io-run` — covers io-run + the Wine subprofile.
 - `com.brave.Browser` — second perimeter on Brave.
+
+## Outbound firewall — OpenSnitch
+
+OpenSnitch is a deny-by-default, interactive outbound firewall. The
+daemon (`opensnitchd`) runs as root; the GUI runs per-user. Default
+config:
+
+- `DefaultAction: deny` — anything not on the allow-list hits a popup.
+- `ProcMonitorMethod: ebpf` — kernel-side process tracking, harder to
+  bypass than ptrace.
+- `Firewall: nftables` — matches the rest of the IO firewall stack.
+
+Baseline rules ship in `/etc/opensnitchd/rules/`:
+
+- `000-allow-system.json` — systemd-resolved, NetworkManager, Flatpak,
+  zypper, transactional-update. Otherwise first boot is unusable.
+- `010-allow-default-apps.json` — Brave, Proton Mail/Pass/VPN,
+  Thunderbird. Removing this file restores deny-by-default for those
+  Flatpaks too.
+
+Anything else gets a "this app wants to connect to X, allow?" prompt
+with options: once, for a session, always, deny, deny always.
+
+## Disk encryption — LUKS2 + TPM2
+
+The Calamares installer (`branding/calamares/`) forces LUKS2 partition
+encryption — no opt-out in the guided flow. The user types a
+passphrase during install; that passphrase doubles as the recovery
+unlock key.
+
+After bootloader install, the `shellprocess@io-tpm2-enroll` step
+calls `systemd-cryptenroll --tpm2-pcrs=0+7+14` on the LUKS volume.
+PCRs cover:
+
+- **0** — firmware code measurement (catches firmware tampering)
+- **7** — Secure Boot signature DB (only IO-signed kernels unlock)
+- **14** — boot-loader configuration (catches `grub.cfg` edits)
+
+If any of those measurements change between boots, the TPM auto-unlock
+fails and the system prompts for the passphrase. The passphrase remains
+valid; only the convenience auto-unlock breaks.
+
+Users who opt out (a hidden flag in Calamares users page) get a normal
+LUKS2 system with passphrase-only unlock.
 
 ## Brave policy
 
@@ -140,12 +188,13 @@ Managed != mandatory (we use top-level keys, not `Recommended`).
 | Gap                                              | Plan                                            |
 |--------------------------------------------------|-------------------------------------------------|
 | Secure Boot with IO-controlled keys              | v0.2 — sign kernel + initrd + shim, MOK-enrol   |
-| TPM2-bound LUKS auto-unlock                      | v0.2 — Calamares preset + printed recovery key  |
-| AppArmor `enforce` mode                          | v0.2 — switch after first round of audit data   |
 | systemd-homed encrypted home                     | v0.3 — needs Calamares + portable-home story    |
 | FIDO2 / smartcard SDDM login                     | v0.3 — pam-u2f + pam-pkcs11                     |
 | Reproducible-build attestation                   | v0.3 — wire flags through kiwi + OBS            |
 | BSI Grundschutz preset toggle                    | v0.4 — IO Settings switch flips audit + policy  |
+
+(TPM2-bound LUKS and AppArmor enforce mode moved up to v0.1; the
+preset + `IO_APPARMOR_ENFORCE=1` build flag ship in this release.)
 
 ## How to verify (any user)
 

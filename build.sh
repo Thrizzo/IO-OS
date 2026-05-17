@@ -176,9 +176,68 @@ EOF
         "$OVERLAY/etc/modules-load.d/io-ntsync.conf"
     for prof in "$ROOT/branding/security/apparmor"/*; do
         [ -f "$prof" ] || continue
-        install -Dm644 "$prof" \
-            "$OVERLAY/etc/apparmor.d/$(basename "$prof")"
+        local dest="$OVERLAY/etc/apparmor.d/$(basename "$prof")"
+        install -Dm644 "$prof" "$dest"
+        # IO_APPARMOR_ENFORCE=1 flips `flags=(complain)` to `flags=()` so
+        # the profile loads in enforce mode at boot. Default is complain
+        # for v0.1 — flip per release after audit data confirms no false
+        # positives that would break the boot.
+        if [ "${IO_APPARMOR_ENFORCE:-0}" = "1" ]; then
+            sed -i -E 's/flags=\(complain([,)])/flags=(\1/; s/flags=\(complain\)/flags=()/' "$dest"
+        fi
     done
+
+    # ---- Security: OpenSnitch (interactive outbound firewall) ----
+    install -Dm644 "$ROOT/branding/security/opensnitch/default-config.json" \
+        "$OVERLAY/etc/opensnitchd/default-config.json"
+    for r in "$ROOT/branding/security/opensnitch/rules"/*.json; do
+        [ -f "$r" ] || continue
+        install -Dm644 "$r" \
+            "$OVERLAY/etc/opensnitchd/rules/$(basename "$r")"
+    done
+
+    # ---- Calamares branding + preset (LUKS2 + TPM2 enrol on install) ----
+    install -Dm644 "$ROOT/branding/calamares/settings.conf" \
+        "$OVERLAY/etc/calamares/settings.conf"
+    install -Dm644 "$ROOT/branding/calamares/modules/partition.conf" \
+        "$OVERLAY/etc/calamares/modules/partition.conf"
+    install -Dm644 "$ROOT/branding/calamares/modules/shellprocess-tpm2.conf" \
+        "$OVERLAY/etc/calamares/modules/shellprocess-tpm2.conf"
+    install -Dm644 "$ROOT/branding/calamares/branding/io/branding.desc" \
+        "$OVERLAY/etc/calamares/branding/io/branding.desc"
+
+    # ---- GRUB theme ----
+    if [ -f "$ROOT/branding/grub2-theme/io/theme.txt" ]; then
+        install -dm755 "$OVERLAY/boot/grub2/themes/io"
+        "$ROOT/branding/grub2-theme/io/generate-assets.sh" >/dev/null || true
+        for f in "$ROOT/branding/grub2-theme/io"/*; do
+            [ -f "$f" ] || continue
+            case "$f" in
+                *.sh|*.md) continue ;;
+            esac
+            install -Dm644 "$f" \
+                "$OVERLAY/boot/grub2/themes/io/$(basename "$f")"
+        done
+    fi
+
+    # ---- Sound theme (alias of freedesktop until we record .oga files) ----
+    install -Dm644 "$ROOT/branding/sounds/io/index.theme" \
+        "$OVERLAY/usr/share/sounds/io/index.theme"
+    install -dm755 "$OVERLAY/usr/share/sounds/io/stereo"
+
+    # ---- Cursor theme alias ----
+    install -Dm644 "$ROOT/branding/cursors/io/index.theme" \
+        "$OVERLAY/usr/share/icons/io/index.theme"
+
+    # ---- io-settings (Win11-Settings-shaped front-end over KCM) ----
+    install -Dm755 "$ROOT/packages/io-settings/io-settings" \
+        "$OVERLAY/usr/bin/io-settings"
+    install -Dm644 "$ROOT/packages/io-settings/qml/Main.qml" \
+        "$OVERLAY/usr/share/io-settings/Main.qml"
+    install -Dm644 "$ROOT/packages/io-settings/qml/categories.js" \
+        "$OVERLAY/usr/share/io-settings/categories.js"
+    install -Dm644 "$ROOT/packages/io-settings/io-settings.desktop" \
+        "$OVERLAY/usr/share/applications/io-settings.desktop"
 
     # ---- io-run dispatcher (Windows binary launcher) ----
     install -Dm755 "$ROOT/packages/io-run/io-run" \

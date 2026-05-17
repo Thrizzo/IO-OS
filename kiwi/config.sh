@@ -23,6 +23,21 @@ suseInsertService sddm
 suseInsertService firewalld          || true
 suseInsertService apparmor           || true
 suseInsertService systemd-resolved   || true
+suseInsertService opensnitchd        || true
+
+# Activate the IO GRUB theme. The themed PNGs ship under
+# /boot/grub2/themes/io/. -R regenerates grub.cfg in place.
+if [ -f /boot/grub2/themes/io/theme.txt ]; then
+    if ! grep -q '^GRUB_THEME=' /etc/default/grub; then
+        echo 'GRUB_THEME="/boot/grub2/themes/io/theme.txt"' >> /etc/default/grub
+    else
+        sed -i 's|^GRUB_THEME=.*|GRUB_THEME="/boot/grub2/themes/io/theme.txt"|' /etc/default/grub
+    fi
+    # `grub2-mkconfig` may not be runnable inside the build chroot if
+    # there's no /boot device yet; silence the error so the build
+    # continues. On first boot openSUSE regenerates grub.cfg anyway.
+    grub2-mkconfig -o /boot/grub2/grub.cfg >/dev/null 2>&1 || true
+fi
 
 # Boot into the graphical target — Plasma is the point of this image.
 baseSetRunlevel 5

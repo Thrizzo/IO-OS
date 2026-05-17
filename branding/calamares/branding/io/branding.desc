@@ -1,0 +1,37 @@
+# Calamares branding descriptor for IO Linux.
+# Path: /etc/calamares/branding/io/branding.desc inside the image.
+
+---
+componentName: io
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+
+windowExpanding: normal
+windowSize: 1010px,640px
+windowPlacement: center
+
+strings:
+    productName:        IO Linux
+    shortProductName:   IO
+    version:            v0.1 Alpha
+    shortVersion:       v0.1
+    versionedName:      IO Linux v0.1 Alpha
+    shortVersionedName: IO 0.1
+    bootloaderEntryName: IO Linux
+    productUrl:         https://github.com/thrizzo/io-os
+    supportUrl:         https://github.com/thrizzo/io-os/issues
+    releaseNotesUrl:    https://github.com/thrizzo/io-os/blob/main/docs/roadmap.md
+
+images:
+    productLogo:       "io-logo.png"
+    productIcon:       "io-logo.png"
+    productWelcome:    "welcome.png"
+
+slideshow: "show.qml"
+
+style:
+    sidebarBackground:    "#1a2332"
+    sidebarText:          "#F0F0F0"
+    sidebarTextSelect:    "#1a2332"
+    sidebarTextHighlight: "#D4A24A"

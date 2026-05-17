@@ -1,0 +1,28 @@
+{
+    "_comment": [
+        "OpenSnitch daemon config shipped to /etc/opensnitchd/default-config.json.",
+        "Goal: deny-by-default outbound traffic with an interactive prompt for",
+        "anything not on the allow-list. The prompt is per-user; the daemon",
+        "runs as root so a compromised user app can't disable it.",
+        "Tweak via System Settings -> Privacy & Security -> OpenSnitch."
+    ],
+
+    "Server": {
+        "Address": "unix:///tmp/osui.sock",
+        "LogFile": "/var/log/opensnitchd.log"
+    },
+
+    "DefaultAction": "deny",
+    "DefaultDuration": "until restart",
+    "InterceptUnknown": true,
+    "ProcMonitorMethod": "ebpf",
+    "LogLevel": 2,
+    "Firewall": "nftables",
+    "Stats": {
+        "MaxEvents": 150,
+        "MaxStats": 25
+    },
+    "Rules": {
+        "Path": "/etc/opensnitchd/rules"
+    }
+}
