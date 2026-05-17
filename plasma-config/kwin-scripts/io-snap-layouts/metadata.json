@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [{"Name": "The IO Linux contributors"}],
+        "Description": "Windows 11 Snap Layouts picker: Meta+Z shows a chooser; numbers 1-6 pick a layout for the active window.",
+        "Description[de]": "Windows-11-Snap-Layouts: Meta+Z öffnet die Auswahl, 1-6 wählt ein Layout für das aktive Fenster.",
+        "Id": "io-snap-layouts",
+        "License": "GPL-3.0-or-later",
+        "Name": "IO Snap Layouts",
+        "Name[de]": "IO Snap-Layouts",
+        "Version": "0.1.0",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js"
+}

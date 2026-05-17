@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=IO Settings
+Name[de]=IO Einstellungen
+GenericName=System settings
+GenericName[de]=Systemeinstellungen
+Comment=Win11-shaped front-end over Plasma System Settings
+Comment[de]=Win11-ähnliche Oberfläche für die Plasma-Systemeinstellungen
+Exec=io-settings %u
+Icon=preferences-system
+Terminal=false
+NoDisplay=false
+Categories=Settings;DesktopSettings;Qt;KDE;
+Keywords=settings;control;preferences;system;
+StartupNotify=true
+StartupWMClass=io-settings

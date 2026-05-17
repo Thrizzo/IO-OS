@@ -114,6 +114,22 @@
         <package name="qt6-declarative-tools"/>
         <package name="qt6-quickcontrols2"/>
 
+        <!-- Fonts. Inter is the open-source Segoe analogue (referenced by
+             plasma-config/kdeglobals); JetBrains Mono is the monospace
+             pick; Noto covers everything our two locales don't. Without
+             these explicit packages the kdeglobals font config falls back
+             to whatever Plasma's defaults pick, which defeats the point. -->
+        <package name="inter-fonts"/>
+        <package name="jetbrains-mono-fonts"/>
+        <package name="noto-sans-fonts"/>
+        <package name="noto-sans-mono-fonts"/>
+        <package name="noto-emoji-fonts"/>
+
+        <!-- Sound theme: KDE looks up /usr/share/sounds/<theme>/index.theme.
+             We ship our own theme alias plus the freedesktop default so the
+             alias has something to fall back to before our .oga files land. -->
+        <package name="sound-theme-freedesktop"/>
+
         <!-- Flatpak: primary user-app delivery channel per docs/architecture.md. -->
         <package name="flatpak"/>
 
@@ -131,11 +147,18 @@
         <package name="python3"/>
 
         <!-- Security: AppArmor (MAC), firewalld (deny-inbound), DoT via
-             systemd-resolved (already part of systemd). -->
+             systemd-resolved (already part of systemd), OpenSnitch
+             (interactive outbound firewall), TPM2 tooling for LUKS
+             auto-unlock at install time. -->
         <package name="apparmor-parser"/>
         <package name="apparmor-profiles"/>
         <package name="apparmor-utils"/>
         <package name="firewalld"/>
+        <package name="opensnitch"/>
+        <package name="opensnitch-ui"/>
+        <package name="tpm2.0-tools"/>
+        <package name="tpm2-tss"/>
+        <package name="cryptsetup"/>
 
         <!-- Filesystems / partitioning support. -->
         <package name="parted"/>

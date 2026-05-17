@@ -1,0 +1,23 @@
+# IO Linux sound theme.
+# freedesktop sound-theme spec: https://specifications.freedesktop.org/sound-theme-spec/
+#
+# v0.1 strategy: alias the freedesktop default theme. As we author
+# replacement .oga files (login, logout, message-new-email,
+# bell-window-system, dialog-warning) they land next to this file
+# under the same names and silently shadow the inherited ones.
+#
+# This keeps the user experience consistent: events make sound from
+# day one, and any custom IO sound we record later transparently
+# upgrades that event without a config change.
+
+[Sound Theme]
+Name=IO
+Name[de]=IO
+Comment=Sound theme for IO Linux
+Comment[de]=Klangthema für IO Linux
+Inherits=freedesktop
+Directories=stereo
+Example=bell
+
+[stereo]
+OutputProfile=stereo

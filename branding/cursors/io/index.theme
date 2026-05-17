@@ -1,0 +1,14 @@
+# IO Linux cursor theme.
+# X11 cursor-theme format. Until we render IO-specific cursor pixmaps
+# we inherit Breeze; this entry exists so users can pick "IO" in
+# System Settings -> Cursors instead of being routed back to "Breeze".
+#
+# When the IO cursor pack lands it drops bitmap cursors into ./cursors/
+# under freedesktop names (default, text, pointer, wait, …) and those
+# shadow Breeze's versions. Same upgrade path as the sound theme.
+
+[Icon Theme]
+Name=IO
+Comment=Cursor theme for IO Linux
+Comment[de]=Mauszeiger-Thema für IO Linux
+Inherits=breeze_cursors

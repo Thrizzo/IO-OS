@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Launcher for io-settings — a Win11-shaped front-end over KCM modules.
+#
+# Like io-welcome, the UI is pure QML so we don't take a C++ + RPM
+# dependency for v0.1. The launcher locates the Qt6 qml runtime and
+# runs Main.qml; everything category-related is delegated to
+# kcmshell6 (which is part of Plasma).
+
+set -euo pipefail
+
+QML_FILE="/usr/share/io-settings/Main.qml"
+
+QML_BIN=""
+for candidate in qml6 qml; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        QML_BIN=$(command -v "$candidate")
+        break
+    fi
+done
+
+notify() {
+    if command -v kdialog >/dev/null 2>&1; then
+        kdialog --title "IO Settings" --passivepopup "$1" 5 || true
+    fi
+    echo "io-settings: $1" >&2
+}
+
+if [ -z "$QML_BIN" ]; then
+    notify "no qml runtime on PATH — falling back to systemsettings."
+    exec systemsettings "$@" 2>/dev/null || exec systemsettings5 "$@"
+fi
+if [ ! -f "$QML_FILE" ]; then
+    notify "$QML_FILE missing — falling back to systemsettings."
+    exec systemsettings "$@" 2>/dev/null || exec systemsettings5 "$@"
+fi
+
+exec "$QML_BIN" "$QML_FILE" -- "$@"

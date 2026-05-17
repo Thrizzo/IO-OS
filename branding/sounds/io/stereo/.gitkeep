@@ -1,0 +1,5 @@
+# Directory reserved for IO-specific .oga / .ogg files.
+# When a file lands here with one of the freedesktop sound names
+# (e.g. service-login.oga, complete.oga, dialog-warning.oga) it
+# shadows the inherited theme's version. Until then the parent
+# `freedesktop` theme provides the sound.

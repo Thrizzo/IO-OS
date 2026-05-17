@@ -38,6 +38,15 @@ Window Quick Tile Left=Meta+Left,Meta+Left,Quick Tile Window to the Left
 Window Quick Tile Right=Meta+Right,Meta+Right,Quick Tile Window to the Right
 Window Quick Tile Top=Meta+Up,Meta+Up,Quick Tile Window to the Top
 Window Quick Tile Bottom=Meta+Down,Meta+Down,Quick Tile Window to the Bottom
+# Quadrant tiles (Win11 Snap Layouts equivalent without the hover overlay):
+# Meta+U = top-left, Meta+I = top-right, Meta+J = bottom-left, Meta+K = bottom-right.
+# Plasma names them "Quick Tile Window to ...".
+Window Quick Tile Top Left=Meta+U,Meta+U,Quick Tile Window to the Top Left
+Window Quick Tile Top Right=Meta+O,Meta+O,Quick Tile Window to the Top Right
+Window Quick Tile Bottom Left=Meta+J,Meta+J,Quick Tile Window to the Bottom Left
+Window Quick Tile Bottom Right=Meta+L,Meta+L,Quick Tile Window to the Bottom Right
+# Meta+Z opens the IO Snap Layouts picker (KWin script).
+Show Snap Layouts=Meta+Z,Meta+Z,Show Snap Layouts Picker
 # Win+Tab — task view (KWin Overview effect).
 Overview=Meta+Tab,none,Toggle Overview
 # Maximise / minimise / close (Plasma defaults are kept; listed for clarity).
@@ -70,8 +79,15 @@ show notification center=Meta+A,Meta+A,Show Notification Center
 # Original Meta+R/Alt+Space/Meta+Space bindings are preserved above.
 _launch=Meta+S\tMeta+R\tAlt+Space\tMeta+Space,Alt+Space\tMeta+Space,KRunner
 
+[io-settings.desktop]
+_k_friendly_name=IO Settings
+# Win+I = settings (Windows 11). io-settings is a Win11-Settings-shaped
+# front-end over the existing KCM modules; falls back to systemsettings
+# if io-settings is not installed (the kglobalaccel daemon will just log
+# "service not found").
+_launch=Meta+I,Meta+I,IO Settings
+
 [systemsettings.desktop]
 _k_friendly_name=System Settings
-# Win+I = settings (Windows 11). Once io-settings ships it can override
-# this _launch line to point at io-settings.desktop instead.
-_launch=Meta+I,none,System Settings
+# Kept for users who prefer the raw KCM tree.
+_launch=Meta+Shift+I,none,System Settings

@@ -1,0 +1,67 @@
+# IO Linux GRUB theme.
+# Loaded by /etc/default/grub via:   GRUB_THEME=/boot/grub2/themes/io/theme.txt
+# Reference: https://www.gnu.org/software/grub/manual/grub/html_node/Theme-file-format.html
+#
+# Colours below mirror branding/colors/IO.colors:
+#   #1a2332 = primary navy   (background)
+#   #D4A24A = accent amber   (selection / highlights)
+#   #F0F0F0 = foreground     (regular text)
+#   #A0A8B5 = secondary text (descriptions, footers)
+
+# --- Global theme metadata -------------------------------------------------
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#1a2332"
+title-color: "#D4A24A"
+title-font: "DejaVu Sans Bold 16"
+message-color: "#F0F0F0"
+message-bg-color: "#1a2332"
+terminal-font: "DejaVu Sans Mono 12"
+terminal-box: "terminal_*.png"
+
+# --- Boot menu -------------------------------------------------------------
++ boot_menu {
+    left = 20%
+    top = 30%
+    width = 60%
+    height = 40%
+
+    item_font = "DejaVu Sans 14"
+    item_color = "#F0F0F0"
+    item_height = 32
+    item_padding = 8
+    item_spacing = 4
+
+    selected_item_font = "DejaVu Sans Bold 14"
+    selected_item_color = "#1a2332"
+    selected_item_pixmap_style = "selected_*.png"
+
+    scrollbar = true
+    scrollbar_width = 6
+    scrollbar_thumb = "scrollbar_*.png"
+}
+
+# --- Footer help text ------------------------------------------------------
++ label {
+    top = 90%
+    left = 0
+    width = 100%
+    align = "center"
+    color = "#A0A8B5"
+    font = "DejaVu Sans 11"
+    text = "Use arrow keys to choose. Press Enter to boot. e to edit. c for command line."
+}
+
+# --- Progress bar for the timeout countdown --------------------------------
++ progress_bar {
+    id = "__timeout__"
+    left = 25%
+    top = 80%
+    width = 50%
+    height = 6
+    show_text = false
+    bar_style = "progress_*.png"
+    fg_color = "#D4A24A"
+    bg_color = "#243047"
+    border_color = "#243047"
+}
